@@ -704,6 +704,7 @@ export function ideaItemToRow(userId: string, idea: IdeaItem) {
     maturity_score: typeof idea.maturityScore === 'number' ? idea.maturityScore : calculateMaturityScore(idea).score,
     is_favorite: !!idea.isFavorite,
     parent_id: idea.parentId || null,
+    source_url: idea.sourceUrl || null,
     created_at: idea.createdAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -741,6 +742,7 @@ export function rowToIdeaItem(row: any): IdeaItem {
     maturityScore: typeof row.maturity_score === 'number' ? row.maturity_score : undefined,
     isFavorite: !!row.is_favorite,
     parentId: row.parent_id || undefined,
+    sourceUrl: row.source_url || undefined,
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
   };

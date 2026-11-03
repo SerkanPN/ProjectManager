@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Square, Sparkles, X, Check, ArrowRight, CornerDownLeft, Volume2, AlertCircle } from 'lucide-react';
+import { Mic, MicOff, Square, Sparkles, X, Check, ArrowRight, CornerDownLeft, Volume2, AlertCircle, Link2 } from 'lucide-react';
 import { DomainType, PriorityType } from '../types';
 import { requestAudioTranscription, requestAiActionPlan } from '../services/aiService';
 
@@ -13,6 +13,7 @@ interface QuickCaptureModalProps {
     domain: DomainType;
     priority: PriorityType;
     generateActionPlanImmediately: boolean;
+    sourceUrl?: string;
   }) => Promise<void>;
   existingIdeas: import('../types').IdeaItem[];
 }
@@ -28,6 +29,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   const [rawText, setRawText] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [priority, setPriority] = useState<PriorityType>('medium');
+  const [linkUrl, setLinkUrl] = useState('');\r
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioVolume, setAudioVolume] = useState<number>(0);
@@ -216,6 +218,18 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
       setDomain('youtube_automation');
     } else if (lower.includes('app') || lower.includes('yapay zeka') || lower.includes('saas') || lower.includes('kod') || lower.includes('api') || lower.includes('yazilim') || lower.includes('mvp')) {
       setDomain('ai_apps');
+    }
+  };
+
+  // Detect if pasted value is a URL and which domain it belongs to
+  const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.trim();
+    setLinkUrl(val);
+    if (!val) return;
+    if (val.includes('etsy.com')) {
+      setDomain('etsy_pod');
+    } else if (val.includes('youtube.com') || val.includes('youtu.be')) {
+      setDomain('youtube_automation');
     }
   };
 
@@ -478,7 +492,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
             <button
               type="button"
               onClick={() => handleSave(false)}
-              disabled={isSubmitting || (!rawText.trim() && !customTitle.trim())}
+              disabled={isSubmitting || (!rawText.trim() && !customTitle.trim() && !linkUrl.trim())}
               className="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             >
               Yalnizca Not Olarak Kaydet
@@ -487,7 +501,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
             <button
               type="button"
               onClick={() => handleSave(true)}
-              disabled={isSubmitting || (!rawText.trim() && !customTitle.trim())}
+              disabled={isSubmitting || (!rawText.trim() && !customTitle.trim() && !linkUrl.trim())}
               className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-sm transition-all active:scale-98 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (

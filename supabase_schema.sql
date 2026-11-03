@@ -21,6 +21,7 @@ create table if not exists ideas (
   maturity_score integer,
   is_favorite boolean default false,
   parent_id text,
+  source_url text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

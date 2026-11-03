@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Video, Cpu, Globe, CheckSquare, ArrowRight, Star, Trash2, Sparkles, Tag, Bell } from 'lucide-react';
+import { ShoppingBag, Video, Cpu, Globe, CheckSquare, ArrowRight, Star, Trash2, Sparkles, Tag, Bell, ExternalLink } from 'lucide-react';
 import { IdeaItem, StatusType, DomainType } from '../types';
 import { calculateMaturityScore } from '../services/storage';
 

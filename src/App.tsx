@@ -285,6 +285,7 @@ export default function App() {
     priority: PriorityType;
     generateActionPlanImmediately: boolean;
     parentId?: string;
+    sourceUrl?: string;
   }) => {
     if (!user) return;
     const newId = `idea-${Date.now()}`;
@@ -298,7 +299,8 @@ export default function App() {
       tags: [data.domain.replace('_', ' ')],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      parentId: data.parentId
+      parentId: data.parentId,
+      sourceUrl: data.sourceUrl || undefined
     };
 
     if (data.generateActionPlanImmediately) {

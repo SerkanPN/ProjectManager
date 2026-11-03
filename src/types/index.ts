@@ -267,6 +267,9 @@ export interface IdeaItem {
   youtubeStudio?: YouTubeStudioOutput;
   aiAppStudio?: AIAppStudioOutput;
   indonesiaStudio?: IndonesiaStudioOutput;
+
+  // Link capture (Etsy product / YouTube video URL)
+  sourceUrl?: string;
 }
 
 export interface Settings {
