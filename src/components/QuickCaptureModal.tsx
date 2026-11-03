@@ -29,7 +29,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   const [rawText, setRawText] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [priority, setPriority] = useState<PriorityType>('medium');
-  const [linkUrl, setLinkUrl] = useState('');\r
+  const [linkUrl, setLinkUrl] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioVolume, setAudioVolume] = useState<number>(0);
@@ -239,13 +239,30 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     detectDomainFromText(val);
   };
 
-  const handleSave = async (generateActionPlanImmediately: boolean) => {
-    if (!rawText.trim() && !customTitle.trim()) {
-      setStatusMessage('Lutfen bir fikir notu girin veya sesinizi kaydedin.');
+const handleSave = async (generateActionPlanImmediately: boolean) => {
+    const trimmedRaw = rawText.trim();
+    const trimmedTitle = customTitle.trim();
+    const trimmedLink = linkUrl.trim();
+
+    if (!trimmedRaw && !trimmedTitle && !trimmedLink) {
+      setStatusMessage('Lutfen bir fikir notu girin, link yapistirin veya sesinizi kaydedin.');
       return;
     }
 
-    const generatedOrCustomTitle = customTitle.trim() || rawText.trim().split('\n')[0].slice(0, 60);
+    // Determine title
+    let generatedOrCustomTitle = trimmedTitle;
+    if (!generatedOrCustomTitle) {
+      if (trimmedRaw) {
+        generatedOrCustomTitle = trimmedRaw.split('\n')[0].slice(0, 60);
+      } else if (trimmedLink) {
+        try {
+          const parsed = new URL(trimmedLink);
+          generatedOrCustomTitle = (parsed.hostname.replace('www.', '') + parsed.pathname).slice(0, 60);
+        } catch {
+          generatedOrCustomTitle = trimmedLink.slice(0, 60);
+        }
+      }
+    }
 
     // Duplicate detection
     const isDuplicate = existingIdeas.some(i => 
@@ -262,14 +279,16 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     try {
       await onSaveIdea({
         title: generatedOrCustomTitle,
-        rawInput: rawText.trim(),
+        rawInput: trimmedRaw || trimmedLink,
         domain,
         priority,
-        generateActionPlanImmediately
+        generateActionPlanImmediately,
+        sourceUrl: trimmedLink || undefined
       });
       // Reset form
       setRawText('');
       setCustomTitle('');
+      setLinkUrl('');
       setStatusMessage(null);
       onClose();
     } catch (err: any) {
@@ -280,7 +299,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
@@ -417,6 +436,39 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
 
         {/* Input Fields */}
         <div className="p-6 space-y-4">
+          {/* Link URL field (Etsy or YouTube) */}
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">
+              🔗 Etsy veya YouTube Linki (Istege Bagli)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Link2 className="w-3.5 h-3.5 text-slate-500" />
+              </div>
+              <input
+                type="url"
+                value={linkUrl}
+                onChange={handleLinkChange}
+                placeholder="https://www.etsy.com/... veya https://www.youtube.com/watch?v=..."
+                className="w-full pl-9 pr-24 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/80 transition-all"
+              />
+              {linkUrl && (
+                <div className="absolute inset-y-0 right-3 flex items-center gap-1.5 pointer-events-none">
+                  {linkUrl.includes('etsy.com') && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      Etsy POD
+                    </span>
+                  )}
+                  {(linkUrl.includes('youtube.com') || linkUrl.includes('youtu.be')) && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      YouTube
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">
               Fikir Notu / Ham Dusunce
