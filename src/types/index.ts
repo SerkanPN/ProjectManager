@@ -277,6 +277,7 @@ export interface Settings {
   lastBackupTimestamp?: string;
   lastDriveBackupTimestamp?: string;
   isDriveBackupEnabled: boolean;
+  deepWorkMode?: boolean;
 }
 
 export interface BackupItem {

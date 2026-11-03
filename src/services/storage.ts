@@ -27,603 +27,565 @@ export const calculateMaturityScore = (idea: IdeaItem): MaturityScoreBreakdown =
 };
 
 // -------------------------------------------------------------
-// 21 REAL SOLOPRENEUR PROJECTS (ALL AT RAW IDEA / INBOX STAGE)
+// 21 REAL USER PROJECTS (EXACT USER SPECIFIED LIST)
 // -------------------------------------------------------------
 export const REAL_USER_PROJECTS: IdeaItem[] = [
-  // --- 8 ETSY PRINT-ON-DEMAND PROJECTS ---
+  // --- 17 ETSY PRODUCTS ---
   {
     id: 'etsy-01',
-    title: 'Kişiselleştirilmiş Spotify Şarkı & Dalga Akrilik Plak',
-    rawInput: 'Spotify şarkı kodu taranabilir, şeffaf pleksi akrilik cam üzerinde özel çift fotoğrafı ve ses dalgası.',
+    title: 'Etsy Affirmation Poster-Calendar',
+    rawInput: 'Affirmation, motivational, inspirational posterler tasarlanır. Örnek fikir olarak geçmiş yıla ait 12 adet başarı-mutluluk anlarının fotoğrafları ile takvim yapılır. Ya da her ay için bir görselle takvim yapılır. Bunun gibi fikirler için yapay zekadan destek alınır.',
     domain: 'etsy_pod',
     status: 'inbox',
-    priority: 'high',
-    tags: ['etsy pod', 'spotify plaque', 'custom gift', 'acrylic art', 'anniversary'],
-    createdAt: '2026-10-15T09:00:00.000Z',
+    priority: 'medium',
+    tags: ['etsy pod', 'affirmation', 'poster calendar', 'motivational', 'custom photo calendar'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Kişiye özel Spotify ses kodu ve fotoğraf baskılı şeffaf akrilik stand. Sevgililer ve yıldönümü hediyesi olarak yüksek dönüşümlü.',
-      tags: ['spotify code', 'custom plaque', 'gift for couple', 'acrylic music print'],
+      summary: 'Kişisel gelişim, motivasyon ve geçmiş yılın 12 başarı anını fotoğraflarla takvime dönüştüren özel poster takvim koleksiyonu.',
+      tags: ['affirmation poster', 'motivational calendar', 'custom photo calendar'],
       domainSpecifics: {
-        niche: 'Kişiselleştirilmiş Müzik & Yıldönümü Hediyeleri',
-        productType: '8x10 inç Şeffaf Akrilik Pleksi + Ahşap LED Stand',
-        targetAudience: 'Çiftler, müzikseverler, doğum günü ve yıldönümü hediyesi arayanlar',
-        tags: ['custom spotify glass', 'song plaque acrylic', 'anniversary gift', 'scannable music code'],
-        designConcept: 'Minimalist şeffaf layout, Spotify player arayüzü, 300 DPI UV baskı şablonu.',
-        competitionInsight: 'Ahşap LED ışıklı taban ve hediye paketi seçeneği sunarak rakiplerden ayrışın.'
+        niche: 'Motivasyon & Kişiselleştirilmiş Takvim',
+        productType: '12 Aylık Duvar & Masa Takvim Posteri (A3/A2)',
+        targetAudience: 'Kişisel gelişim meraklıları, hediye arayanlar ve planlama tutkunları',
+        tags: ['affirmation poster', 'motivational calendar', 'custom photo calendar', 'inspirational print'],
+        designConcept: 'Minimalist tipografi, pozitif olumlama sözleri ve estetik fotoğraf çerçeveleri.',
+        competitionInsight: '12 aylık anı fotoğrafı yükleme bağlantısı sunarak rakiplerden ayrışın.'
       },
       checklist: [
-        { id: 'c1', text: 'Spotify Developer API veya barkod şablonunu Canva içine aktar', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c2', text: 'Printify şeffaf akrilik stand mockuplarını hazırla', done: false, tool: 'Printify', priority: 'high' },
-        { id: 'c3', text: '13 Etsy etiketini ve fiyatlandırma varyasyonlarını gir', done: false, tool: 'Etsy', priority: 'medium' }
+        { id: 'c1', text: '12 ay için AI olumlama sözleri ve tipografi şablonu üret', done: false, tool: 'Canva', priority: 'high' },
+        { id: 'c2', text: 'Printify takvim & poster mockup örneklerini hazırla', done: false, tool: 'Printify', priority: 'high' },
+        { id: 'c3', text: '13 Etsy arama etiketini ekle ve yayınla', done: false, tool: 'Etsy', priority: 'medium' }
       ],
-      strategicNotes: 'Müşteriden şarkı linki ve fotoğrafı 12 saat içinde onaylatmak iadeleri sıfırlar.',
-      generatedAt: '2026-10-15T09:30:00.000Z'
+      strategicNotes: 'Yılbaşı ve yeni yıl başlangıcı dönemlerinde yüksek arama hacmine sahiptir.',
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-02',
-    title: 'Minimalist Vintage 911 / Otomobil Silüet Sanat Posteri',
-    rawInput: 'Klasik Porsche 911 ve retro spor araba teknik çizim silüeti, minimalist Bauhaus tarzı müze mat posteri.',
+    title: 'Kisisellestirilmis poster',
+    rawInput: 'Kişilerin kendi vereceği sözler veya fotoğraflardan bir poster tasarımı. Custom Poster başlığıyla satılır.',
     domain: 'etsy_pod',
     status: 'inbox',
     priority: 'high',
-    tags: ['etsy pod', 'car poster', 'porsche 911', 'garage wall art', 'minimalist'],
-    createdAt: '2026-10-18T11:00:00.000Z',
+    tags: ['etsy pod', 'custom poster', 'personalized print', 'custom quote'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Klasik araba meraklıları ve modern garaj/ofis dekorasyonu için yüksek çözünürlüklü vektör silüet poster serisi.',
-      tags: ['car silhouette', 'vintage 911', 'garage decor', 'minimalist car print'],
+      summary: 'Kullanıcının kendi kişisel sözleri, evlilik yeminleri veya fotoğraflarından hazırlanan "Custom Poster" ürünü.',
+      tags: ['custom poster', 'personalized quote print', 'custom photo text'],
       domainSpecifics: {
-        niche: 'Otomobil Meraklıları & Erkek Ofis/Garaj Duvar Sanatı',
-        productType: '200 GSM Heavyweight Matte Poster (18x24 ve 24x36)',
-        targetAudience: 'Klasik araba tutkunları, mimarlar ve minimalist iç mekan tasarımcıları',
-        tags: ['porsche art print', 'vintage car silhouette', 'garage wall art', 'minimalist car poster'],
-        designConcept: 'Bauhaus renk blokları, teknik aks aralığı metrikleri, monochrome silüet.',
-        competitionInsight: 'Gövde kodları (930, 964, 993) serilerini 3lü set halinde sunarak sepet tutarını artırın.'
+        niche: 'Kişiselleştirilmiş Söz & Fotoğraf Duvar Sanatı',
+        productType: 'Çerçeveli Mat Poster & Dijital İndirme',
+        targetAudience: 'Yıldönümü, doğum günü ve ev hediyesi arayan müşteriler'
       },
       checklist: [
-        { id: 'c4', text: 'Vektör silüet çizimlerini Illustrator/Midjourney ile hazırla', done: false, tool: 'Midjourney', priority: 'high' },
-        { id: 'c5', text: 'Gerçekçi lüks daire ve garaj mockup koleksiyonunu oluştur', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c6', text: 'Arama hacmi yüksek 13 etiketi keyword deposundan seç', done: false, tool: 'eRank', priority: 'medium' }
+        { id: 'c4', text: 'Kişiselleştirilebilir metin & fotoğraf şablonunu oluştur', done: false, tool: 'Canva', priority: 'high' },
+        { id: 'c5', text: 'Etsy listing ve sipariş otomasyon linkini ayarla', done: false, tool: 'Etsy', priority: 'high' }
       ],
-      strategicNotes: 'Erkek hediyeleri kategorisinde babalar günü ve noel döneminde en çok satan nişlerden biridir.',
-      generatedAt: '2026-10-18T11:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-03',
-    title: 'Retro 90\'lar Film & Sinema Tipografi Posteri Serisi',
-    rawInput: 'Pulp Fiction, Fight Club ve Matrix gibi 90lar kült filmleri için minimalist tipografik ve sinematik renk paletli posterler.',
+    title: 'World Cup 2026',
+    rawInput: 'World Cup 2026 temalı ürünler: 1- Oyuncu kartları, 2- Takım posterleri, 3- Fixture, 4- İkonik gol sevinçleri, 5- vs...',
     domain: 'etsy_pod',
     status: 'inbox',
-    priority: 'medium',
-    tags: ['etsy pod', 'movie poster', 'vintage cinema', '90s aesthetic'],
-    createdAt: '2026-10-20T14:00:00.000Z',
+    priority: 'high',
+    tags: ['etsy pod', 'world cup 2026', 'football poster', 'player cards', 'fixture print'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
+    isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Kült filmlerin ikonik diyalogları ve minimalist renk şeritleriyle tasarlanmış modern sinema odası poster koleksiyonu.',
-      tags: ['retro movie print', 'cinema wall decor', 'minimalist film poster'],
+      summary: '2026 Dünya Kupası koleksiyonu: Oyuncu kartları, takım posterleri, maç fikstürü ve ikonik gol sevinçleri baskıları.',
+      tags: ['world cup 2026', 'soccer wall art', 'football player card print'],
       domainSpecifics: {
-        niche: 'Kült Sinema & Ev Sineması Duvar Sanatı',
-        productType: '18x24 inç Arşivlik Mat Kağıt',
-        targetAudience: 'Sinefiller, üniversite öğrencileri ve retro dekorasyon sevenler'
+        niche: 'Futbol & Spor Koleksiyonu Dekorasyonu',
+        productType: 'A3 Fikstür Posteri, Kart Setleri ve Kanvas Tablo'
       },
       checklist: [
-        { id: 'c7', text: 'Telif haklarına uygun fan-art & tipografi tasarımını netleştir', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c8', text: 'Ev sineması ortamında sergilenen mockuplar hazırla', done: false, tool: 'Printify', priority: 'medium' }
+        { id: 'c6', text: '2026 Dünya kupası maç fikstürü vektör çizimini yap', done: false, tool: 'Figma', priority: 'high' },
+        { id: 'c7', text: 'Efsane gol sevinçleri için illüstrasyon ürettir', done: false, tool: 'Midjourney', priority: 'high' }
       ],
-      generatedAt: '2026-10-20T14:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-04',
-    title: 'Estetik Albüm Kapağı & Şarkı Sözü Duvar Sanatı Baskısı',
-    rawInput: 'Popüler müzik albümlerinin renk paleti analizi, süre listesi ve favori şarkı sözüyle hazırlanan estetik galeri duvarı baskısı.',
+    title: 'Spotify poster',
+    rawInput: 'Spotify temalı song poster. Custom Songs Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı şarkısını aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
     domain: 'etsy_pod',
     status: 'inbox',
-    priority: 'medium',
-    tags: ['etsy pod', 'album cover poster', 'music wall art', 'room aesthetic'],
-    createdAt: '2026-10-12T08:00:00.000Z',
+    priority: 'high',
+    tags: ['etsy pod', 'spotify poster', 'custom songs poster', 'scannable music art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
+    isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Genç odaları ve modern çalışma alanları için Pinterest estetiğinde albüm kapağı konsept posterleri.',
-      tags: ['album receipt print', 'custom music poster', 'bedroom wall decor'],
+      summary: 'Sipariş maillerine otomatik link gönderen, kullanıcının şarkısını aratıp bularak kendi posterini tasarlamasını sağlayan dinamik Spotify posteri.',
+      tags: ['custom spotify poster', 'scannable song print', 'music plaque'],
       domainSpecifics: {
-        niche: 'Pinterest Estetiği Genç Odası & Müzik Sanatı',
-        productType: 'A3 & A2 Boyutunda Dijital İndirme ve Fiziki Poster'
+        niche: 'Müzik & Kişiselleştirilmiş Akrilik/Poster',
+        productType: 'Akrilik Cam / Mat Baskı / Dijital İndirme'
       },
       checklist: [
-        { id: 'c9', text: '10 popüler albüm şablonunu tamamla', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c10', text: 'Etsy mağazasında dijital download olarak yayına al', done: false, tool: 'Etsy', priority: 'high' }
+        { id: 'c8', text: 'Arama ve poster oluşturma web link arayüzünü entegre et', done: false, tool: 'Cursor', priority: 'high' },
+        { id: 'c9', text: 'Etsy mesajlaşma otomasyon şablonunu ayarla', done: false, tool: 'Etsy', priority: 'high' }
       ],
-      generatedAt: '2026-10-12T08:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-05',
-    title: '2026 Minimalist Sanatsal Masa & Duvar Takvimi (Aylık)',
-    rawInput: 'Her ay için farklı bir soyut botanik çizim içeren, temiz çizgili 2026 takvimi. Hem dijital yazdırılabilir hem fiziki.',
+    title: 'Album Cover Poster',
+    rawInput: 'Custom Album Cover Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı albümünü aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
     domain: 'etsy_pod',
     status: 'inbox',
     priority: 'high',
-    tags: ['etsy pod', '2026 calendar', 'desk planner', 'printable calendar'],
-    createdAt: '2026-10-25T10:00:00.000Z',
+    tags: ['etsy pod', 'album cover poster', 'custom album print', 'music wall art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Yılbaşı hediyelikleri ve yeni yıl planlaması için 12 aylık minimalist botanik takvim projesi.',
-      tags: ['2026 printable calendar', 'botanical desk calendar', 'new year gift'],
+      summary: 'Kullanıcının albümünü aratıp kişiselleştirdiği web otomasyonlu Custom Album Cover Poster projesi.',
+      tags: ['custom album cover', 'music room decor', 'album receipt art'],
       domainSpecifics: {
-        niche: 'Yeni Yıl Kırtasiye & Planlama',
-        productType: 'Spiralli Masa Takvimi ve A4 Duvar Takvimi'
+        niche: 'Albüm Kapakları & Müzik Duvar Sanatı',
+        productType: '18x24 Mat Poster & Galeri Baskı'
       },
       checklist: [
-        { id: 'c11', text: '12 ayın tarih ve tatil günlerini doğrula', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c12', text: 'Midjourney ile 12 benzersiz botanik illüstrasyon üret', done: false, tool: 'Midjourney', priority: 'high' }
+        { id: 'c10', text: 'Albüm kapak jeneratör modülünü test et', done: false, tool: 'Cursor', priority: 'high' }
       ],
-      generatedAt: '2026-10-25T10:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-06',
-    title: 'Özel Yıldız Haritası & Evlilik / Doğum Koordinat Tablosu',
-    rawInput: 'Seçilen tarih, saat ve şehirdeki gerçek gökyüzü yıldız haritası. Altında özel not ve GPS koordinatları.',
+    title: 'Movie Poster',
+    rawInput: 'Custom Movie-Series Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı filmini veya dizisini aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
     domain: 'etsy_pod',
     status: 'inbox',
     priority: 'high',
-    tags: ['etsy pod', 'star map', 'custom constellation', 'wedding gift'],
-    createdAt: '2026-10-10T12:00:00.000Z',
+    tags: ['etsy pod', 'movie poster', 'custom series poster', 'cinema wall art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Düğün, ilk buluşma veya doğum anını ölümsüzleştiren kişiselleştirilmiş yıldız haritası.',
-      tags: ['custom star map', 'the night we met', 'coordinates art print'],
+      summary: 'Film ve dizi severler için web arama entegrasyonlu Custom Movie-Series Poster.',
+      tags: ['custom movie poster', 'tv series wall print', 'cinema room decor'],
       domainSpecifics: {
-        niche: 'Romantik & Duygusal Kişiselleştirilmiş Hediyeler',
-        productType: 'Çerçeveli Ahşap Poster ve Kanvas'
+        niche: 'Sinema & Dizi Duvar Sanatı',
+        productType: 'Arşivlik Mat Kağıt Baskı'
       },
       checklist: [
-        { id: 'c13', text: 'Otomatik yıldız haritası jeneratör şablonunu oluştur', done: false, tool: 'Canva', priority: 'high' },
-        { id: 'c14', text: 'Etsy listelemesini ve 13 etiketi yayına al', done: false, tool: 'Etsy', priority: 'high' }
+        { id: 'c11', text: 'TMDB API film/dizi arama entegrasyonunu doğrula', done: false, tool: 'Cursor', priority: 'high' }
       ],
-      generatedAt: '2026-10-10T12:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-07',
-    title: 'Soyut Boho Galeri Duvarı 3\'lü Duvar Kağıdı & Baskı Seti',
-    rawInput: 'Terracotta, bej ve adaçayı yeşili tonlarında 3 adet birbirini tamamlayan soyut kemer ve güneş motifi.',
+    title: 'Space Theme Poster',
+    rawInput: 'Custom Space Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı yıldızını aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
     domain: 'etsy_pod',
     status: 'inbox',
-    priority: 'low',
-    tags: ['etsy pod', 'boho art print', 'gallery wall set', 'set of 3 prints'],
-    createdAt: '2026-10-22T15:00:00.000Z',
+    priority: 'medium',
+    tags: ['etsy pod', 'space theme poster', 'custom star map', 'constellation art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: false,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Oturma odası kanepesi arkası için uyumlu 3 parçalı galeri duvar sanatı seti.',
-      tags: ['boho wall decor', 'neutral abstract prints', 'terracotta wall art'],
+      summary: 'Özel gece gökyüzü, yıldızlar ve gezegen takımyıldızlarını kişiselleştiren Custom Space Poster.',
+      tags: ['space poster', 'custom star chart', 'astronomy wall art'],
       domainSpecifics: {
-        niche: 'Boho & Modern İskandinav Ev Dekorasyonu',
-        productType: '3 x (16x20 veya 18x24) Baskı Seti'
+        niche: 'Uzay & Astronomi Hediyeleri',
+        productType: 'Koyu Lacivert & Siyah Baskılı Poster'
       },
       checklist: [
-        { id: 'c15', text: 'Renk paletinin CMYK baskı uyumunu test et', done: false, tool: 'Figma', priority: 'medium' }
+        { id: 'c12', text: 'Yıldız haritası jeneratörünü web linkine bağla', done: false, tool: 'Cursor', priority: 'high' }
       ],
-      generatedAt: '2026-10-22T15:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
   {
     id: 'etsy-08',
-    title: 'Modern Ukiyo-e Manzara & Doğa Kanvas Tablo Koleksiyonu',
-    rawInput: 'Fuji Dağı, koi balıkları ve kiraz çiçeklerinin modern illüstrasyon tekniğiyle yorumlanmış Japon sanat posteri.',
+    title: 'Mystical Poster',
+    rawInput: 'Custom Mystic Poster olarak tanımlanır. Mystic temalı onlarca poster üretecek bir uygulama yapılır, bu sayede binlerce otomatik ürün yaratılır.',
     domain: 'etsy_pod',
     status: 'inbox',
     priority: 'medium',
-    tags: ['etsy pod', 'japanese art', 'ukiyo-e modern', 'fuji mountain art'],
-    createdAt: '2026-10-28T09:00:00.000Z',
+    tags: ['etsy pod', 'mystical poster', 'tarot art', 'astrology print', 'automation app'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: false,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Japon estetiği (Japandi) ve sakinleştirici doğa manzaralı kanvas tablo serisi.',
-      tags: ['japandi wall art', 'japanese woodblock print', 'zen room decor'],
+      summary: 'Mistik, tarot ve astroloji temalı binlerce otomatik poster üreten uygulama destekli koleksiyon.',
+      tags: ['mystic wall art', 'tarot poster generator', 'astrology decor'],
       domainSpecifics: {
-        niche: 'Japandi & Zen Doğa Sanatı',
-        productType: 'Gergili Kanvas ve Ahşap Askılı Poster'
+        niche: 'Mistik & Astroloji Duvar Dekorasyonu',
+        productType: 'Otomatik Toplu Poster Tasarımı & Dijital Download'
       },
       checklist: [
-        { id: 'c16', text: 'Midjourney v6 ile 4 farklı Japandi manzara görseli üret', done: false, tool: 'Midjourney', priority: 'high' }
+        { id: 'c13', text: 'Mistik şablon ve tarot görsel kütüphanesini hazırla', done: false, tool: 'Midjourney', priority: 'high' }
       ],
-      generatedAt: '2026-10-28T09:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
     }
   },
-
-  // --- 7 YOUTUBE VIDEO AUTOMATION PROJECTS ---
   {
-    id: 'yt-01',
-    title: 'İtiraf Saati: "20 Yıldır Kimseye Anlatmadığım Sır" (Gerçek Hikayeler)',
-    rawInput: 'Kişilerin anonim gönderdiği gerçek itiraf mektupları. ElevenLabs derin ve samimi ses tonu, arka planda yağmurlu araba sürüşü veya lo-fi animasyon.',
-    domain: 'youtube_automation',
+    id: 'etsy-09',
+    title: 'Stoaic Poster',
+    rawInput: 'Custom Stoaic Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı filozofu ve sözünü aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
+    domain: 'etsy_pod',
     status: 'inbox',
     priority: 'high',
-    tags: ['youtube automation', 'itiraf hikayeleri', 'elevenlabs', 'faceless', 'viral retention'],
-    createdAt: '2026-10-14T10:00:00.000Z',
+    tags: ['etsy pod', 'stoaic poster', 'stoicism', 'marcus aurelius', 'philosophy print'],
+    createdAt: '2026-05-04T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Yüksek izlenme tutunması sağlayan anonim itiraf videoları. Merak uyandıran ilk 30 saniye ve duygusal doruk noktası.',
-      tags: ['itiraf saatleri', 'gercek hikaye', 'sesli itiraflar', 'faceless video'],
+      summary: 'Marcus Aurelius, Seneca gibi Stoacı filozofların sözlerini ve heykellerini içeren Custom Stoaic Poster.',
+      tags: ['stoic quote poster', 'philosophy wall art', 'memento mori print'],
       domainSpecifics: {
-        titleIdeas: [
-          '20 Yıldır Sakladığı Sırrı Nihayet İtiraf Etti...',
-          'Bu Mektubu Okuduktan Sonra Gözyaşlarımı Tutamadım',
-          'En Yakın Arkadaşımın Yaptığı Şeyi Asla Unutamayacağım'
-        ],
-        first30sHook: '"Eğer bu videoyu izliyorsanız, muhtemelen artık gerçeği öğrenmenin zamanı gelmiştir..." cümlesi ve karanlık araba farı görüntüsü.',
-        automationWorkflow: {
-          voiceover: 'ElevenLabs: Adam / George (Derin, sakin ve hüzünlü ton)',
-          visuals: 'Gece yağmurlu şehir B-roll + Midjourney sinematik kareler',
-          music: 'Hafif piyano melodisi ve yağmur ambiyans sesi'
-        },
-        thumbnailConcept: 'Eski yıpranmış bir mektup, buğulu cam ve üzerinde sarı renkle "SON İTİRAF"'
+        niche: 'Felsefe & Çalışma Odası Motivasyon Dekorasyonu',
+        productType: 'Siyah Beyaz Sütun Heykel Baskısı'
       },
       checklist: [
-        { id: 'c17', text: 'Reddit r/confession hikayesini Türkçe adapte et', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c18', text: 'ElevenLabs seslendirmesini al ve nefes boşluklarını kırp', done: false, tool: 'ElevenLabs', priority: 'high' },
-        { id: 'c19', text: 'CapCut ile altyazı ve sinematik b-roll montajla', done: false, tool: 'CapCut', priority: 'high' }
+        { id: 'c14', text: 'Stoacı filozof ve söz veri tabanını entegre et', done: false, tool: 'Cursor', priority: 'high' }
       ],
-      strategicNotes: 'İlk 45 saniyede izleyici retention oranını %65 üzerinde tutmak YouTube önerilenler sekmesine sokar.',
-      generatedAt: '2026-10-14T10:30:00.000Z'
+      generatedAt: '2026-05-04T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-10',
+    title: 'Custom Car Poster',
+    rawInput: 'Custom Car Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı arabasını aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'custom car poster', 'automobile print', 'car silhouette', 'garage art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: true,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Araba tutkunları için araç marka, model ve teknik özelliklerini kişiselleştiren Custom Car Poster.',
+      tags: ['custom car poster', 'car blueprint art', 'sports car print'],
+      domainSpecifics: {
+        niche: 'Otomobil & Garaj Dekorasyonu',
+        productType: 'Yüksek Çözünürlüklü Vektör Baskı'
+      },
+      checklist: [
+        { id: 'c15', text: 'Araba marka/model arama web servisini bağla', done: false, tool: 'Cursor', priority: 'high' }
+      ],
+      generatedAt: '2026-05-04T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-11',
+    title: 'Patent poster',
+    rawInput: 'Custom Patent Poster olarak tanımlanır. Gelen sipariş mailinden kullanıcının maili alınır, o maile kişiye özel bir link gönderilir ve kullanıcı ürününü aratıp bularak kendi kişiselleştirilmiş posterini oluşturur.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'medium',
+    tags: ['etsy pod', 'patent poster', 'vintage patent print', 'blueprint art'],
+    createdAt: '2026-05-04T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: false,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Tarihi icatların ve ürünlerin teknik patent çizimlerini kişiselleştiren Custom Patent Poster.',
+      tags: ['custom patent poster', 'vintage blueprint', 'inventor wall decor'],
+      domainSpecifics: {
+        niche: 'Tarihi İcatlar & Retro Ofis Sanatı',
+        productType: 'Eski Kağıt Dokulu & Chalkboard Stil Poster'
+      },
+      checklist: [
+        { id: 'c16', text: 'Patent arama API entegrasyonunu tamamla', done: false, tool: 'Cursor', priority: 'high' }
+      ],
+      generatedAt: '2026-05-04T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-12',
+    title: 'Ressam Collection',
+    rawInput: 'Ünlü ressamların tüm resimlerinin dijital versiyonlarının koleksiyonu.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'famous painters', 'fine art prints', 'digital art collection', 'museum print'],
+    createdAt: '2026-05-04T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: true,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Van Gogh, Monet, Klimt gibi dünyaca ünlü ressamların eserlerinden oluşan dev dijital sanat koleksiyonu.',
+      tags: ['fine art print set', 'classic art gallery', 'famous painter collection'],
+      domainSpecifics: {
+        niche: 'Klasik Sanat & Müze Galeri Baskıları',
+        productType: '300 DPI Yüksek Çözünürlüklü Dijital Set'
+      },
+      checklist: [
+        { id: 'c17', text: 'Public domain müze yüksek çözünürlüklü tablolarını indirip düzenle', done: false, tool: 'Figma', priority: 'high' }
+      ],
+      generatedAt: '2026-05-04T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-13',
+    title: 'YouTube Play Buttom',
+    rawInput: 'YouTube playbutton posteri için html, foamboard play button, foamboard play button ledli, alüminyum yekpare.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'youtube play button', 'creator award', 'foamboard led', 'custom plaque'],
+    createdAt: '2026-05-05T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: true,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'İçerik üreticileri için HTML poster, foamboard LED ışıklı ve yekpare alüminyum YouTube Play Button plaketi.',
+      tags: ['custom youtube play button', 'creator plaque', 'led play button award'],
+      domainSpecifics: {
+        niche: 'İçerik Üreticileri & YouTube Yayıncı Plaketleri',
+        productType: 'Foamboard, LED Işıklı Plaket & Alüminyum Gövde'
+      },
+      checklist: [
+        { id: 'c18', text: 'HTML & Vektör play button şablonunu çiz', done: false, tool: 'Figma', priority: 'high' },
+        { id: 'c19', text: 'LEDli ve alüminyum üretim tedarikçilerini belirle', done: false, tool: 'Printify', priority: 'high' }
+      ],
+      generatedAt: '2026-05-05T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-14',
+    title: 'Sehir Posterleri',
+    rawInput: 'Sehir Posterleri. (Etiket: CITYPOSTER)',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'sehir posterleri', 'cityposter', 'city map print', 'travel decor'],
+    createdAt: '2026-06-24T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: false,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Dünyanın popüler şehirlerinin harita, koordinat ve minimalist illüstrasyon posterleri (CITYPOSTER etiketli).',
+      tags: ['cityposter', 'custom city map', 'travel wall art'],
+      domainSpecifics: {
+        niche: 'Şehir Haritaları & Seyahat Dekorasyonu',
+        productType: 'Minimalist Şehir Vektör Posteri'
+      },
+      checklist: [
+        { id: 'c20', text: '50 popüler dünya şehri harita vektörünü derle', done: false, tool: 'Figma', priority: 'high' }
+      ],
+      generatedAt: '2026-06-24T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-15',
+    title: 'Dini Poster',
+    rawInput: 'Dini Poster, niche olarak hac şeklinde yazılmış dini sözler, ilahiler.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'dini poster', 'cross typography', 'hymn art', 'religious wall decor'],
+    createdAt: '2026-06-24T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: false,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Haç şeklinde tipografik olarak dizilmiş dini sözler, dualar ve ilahilerden oluşan özel dini duvar sanatı.',
+      tags: ['christian wall art', 'cross shape typography', 'scripture print'],
+      domainSpecifics: {
+        niche: 'Dini & Manevi Duvar Sanatı',
+        productType: 'Çerçeveli Tipografi Posteri & Kanvas'
+      },
+      checklist: [
+        { id: 'c21', text: 'Haç biçiminde kelime dizim tipografi kalıbını tamamla', done: false, tool: 'Canva', priority: 'high' }
+      ],
+      generatedAt: '2026-06-24T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-16',
+    title: 'Botanical Wallpaper',
+    rawInput: 'Botanical Wallpaper.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'botanical wallpaper', 'peel and stick', 'nature mural', 'seamless pattern'],
+    createdAt: '2026-06-24T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: false,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Ev içi duvar kaplama için tropikal yaprak, palmiye ve vintage botanik desenli yapışkanlı duvar kağıdı.',
+      tags: ['botanical wallpaper', 'peel and stick wall mural', 'floral home decor'],
+      domainSpecifics: {
+        niche: 'Ev Dekorasyonu & Duvar Kağıdı',
+        productType: 'Peel & Stick Sökülebilir Duvar Kağıdı Rulosu'
+      },
+      checklist: [
+        { id: 'c22', text: 'Kesintisiz (seamless) botanik desen kalıplarını hazırla', done: false, tool: 'Midjourney', priority: 'high' }
+      ],
+      generatedAt: '2026-06-24T00:30:00.000Z'
+    }
+  },
+  {
+    id: 'etsy-17',
+    title: 'movie ticket poser',
+    rawInput: 'Movie ticket poster tasarımı. Sinema bileti hatırası ve film bileti konseptli poster tasarımı.',
+    domain: 'etsy_pod',
+    status: 'inbox',
+    priority: 'high',
+    tags: ['etsy pod', 'movie ticket poster', 'vintage cinema stub', 'custom ticket print'],
+    createdAt: '2026-11-02T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: true,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Sinema severler için tarih, koltuk no ve film adı özelleştirilebilir vintage sinema bileti şeklinde poster.',
+      tags: ['movie ticket print', 'custom cinema stub art', 'film lovers gift'],
+      domainSpecifics: {
+        niche: 'Retro Sinema & Bilet Hatıraları',
+        productType: '11x17 ve 18x24 Mat Poster'
+      },
+      checklist: [
+        { id: 'c23', text: 'Nostaljik sinema bileti illüstrasyon şablonunu tamamla', done: false, tool: 'Figma', priority: 'high' }
+      ],
+      generatedAt: '2026-11-02T00:30:00.000Z'
+    }
+  },
+
+  // --- 3 YOUTUBE PROJECTS ---
+  {
+    id: 'yt-01',
+    title: 'Utanc Hikayeleri',
+    rawInput: 'İnsanların utandığı hikayeleri anlatacak. “Su zaman şunu yapmıştım bu zaman bunu yapmıştım” gibi. Biraz Esra Erol tarzı şok edici şeyler olmalı. Tvlerde çıkan yüzü gösterilmeyen kompozisyonunda olacak.',
+    domain: 'youtube_automation',
+    status: 'inbox',
+    priority: 'medium',
+    tags: ['youtube automation', 'utanc hikayeleri', 'esra erol tarzi', 'faceless tv', 'shocking stories'],
+    createdAt: '2026-05-30T00:00:00.000Z',
+    updatedAt: '2026-11-03T10:00:00.000Z',
+    isFavorite: true,
+    maturityScore: 20,
+    actionPlan: {
+      summary: 'Yüzü gösterilmeyen, televizyon programı kompozisyonunda şok edici ve merak uyandırıcı utanç hikayeleri formatı.',
+      tags: ['utanc hikayeleri', 'cringe anlar', 'gizli itiraflar'],
+      domainSpecifics: {
+        titleIdeas: [
+          'O Gün Yaşadığım Şeyi Hayatım Boyunca Unutamayacağım...',
+          'Stüdyodakiler Şok Oldu: Hiç Kimseye Anlatamadığı Utanç'
+        ],
+        first30sHook: '"Yüzümü göstermek istemiyorum çünkü anlatacaklarımı duyarsanız bir daha kimsenin yüzüne bakamam..."',
+        automationWorkflow: {
+          voiceover: 'ElevenLabs: Gizemli ve heyecanlı Türkçe ses tonu',
+          visuals: 'TV stüdyosu gölge silüet görseli + dramatik B-roll'
+        }
+      },
+      checklist: [
+        { id: 'c24', text: 'Şok edici utanç hikayesi senaryosunu kaleme al', done: false, tool: 'Cursor', priority: 'high' },
+        { id: 'c25', text: 'Gölge insan silüeti stüdyo kompozisyonunu CapCut ile kurgula', done: false, tool: 'CapCut', priority: 'high' }
+      ],
+      generatedAt: '2026-05-30T00:30:00.000Z'
     }
   },
   {
     id: 'yt-02',
-    title: 'Utanç Hikayeleri: En Rezil Olduğum 5 An (Reddit & Anonim Gönderiler)',
-    rawInput: 'İnsanların düğünlerde, iş mülakatlarında ve ilk buluşmalarda yaşadığı aşırı komik ve cringe anlar.',
+    title: 'Itiraf ediyorum',
+    rawInput: 'Çarpıcı itirafların yayınlandığı bir YouTube kanalı.',
     domain: 'youtube_automation',
     status: 'inbox',
     priority: 'medium',
-    tags: ['youtube automation', 'utanc hikayeleri', 'komik anlar', 'cringe stories'],
-    createdAt: '2026-10-21T13:00:00.000Z',
+    tags: ['youtube automation', 'itiraf ediyorum', 'confession channel', 'viral retention'],
+    createdAt: '2026-05-30T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
+    isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Eğlenceli ve viral potansiyeli yüksek utanç verici hikaye derlemesi. Shorts ve uzun video uyumlu.',
-      tags: ['cringe anlar', 'en buyuk rezillik', 'rezil hikayeler'],
+      summary: 'Çarpıcı, merak uyandırıcı ve yüksek izlenme tutunmalı anonim itiraf kanalı.',
+      tags: ['itiraf ediyorum', 'gizli sir', 'viral youtube'],
       domainSpecifics: {
-        titleIdeas: ['Yerin Dibine Geçtiğim 5 Utanç Verici Olay', 'Bunu Yaşayan Biri Bir Daha Dışarı Çıkamaz']
+        titleIdeas: [
+          'İtiraf Ediyorum: 5 Yıldır Herkesten Sakladığım Gerçek',
+          'Bunu Söylemek Zorundayım...'
+        ]
       },
       checklist: [
-        { id: 'c20', text: 'En çok oy alan 5 utanç hikayesini derle', done: false, tool: 'Reddit', priority: 'medium' }
+        { id: 'c26', text: 'Anonim itiraf toplama formunu ve seslendirmesini hazırla', done: false, tool: 'ElevenLabs', priority: 'high' }
       ],
-      generatedAt: '2026-10-21T13:30:00.000Z'
+      generatedAt: '2026-05-30T00:30:00.000Z'
     }
   },
   {
     id: 'yt-03',
-    title: 'İnteraktif Sorgu Odası: "Katili Sen Bul!" Bölüm 1 - Kapalı Oda Vakası',
-    rawInput: 'İzleyicinin dedektif olduğu polisiye sorgu dizisi. 3 şüpheli sorgulanıyor, izleyiciye çelişkileri bulması için 10 saniye süre veriliyor.',
+    title: 'Sorgu odasi',
+    rawInput: 'Bir karakolun sorgu odası konseptinde kurgusal cinayetler ve onları çözen dedektifler olacak. Birkaç farklı şüpheliyi sorguladıktan sonra çözecekler. Hatta çözmeyip izleyiciye soracaklar ve bir sonraki bölümde çözecekler.',
     domain: 'youtube_automation',
     status: 'inbox',
-    priority: 'high',
-    tags: ['youtube automation', 'sorgu odasi', 'interaktif polisiye', 'cinayet dosyasi'],
-    createdAt: '2026-10-16T16:00:00.000Z',
+    priority: 'medium',
+    tags: ['youtube automation', 'sorgu odasi', 'polisiye cinayet', 'katili sen bul', 'interactive crime'],
+    createdAt: '2026-05-30T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'İzleyiciyi yorum yapmaya ve ekranda kalmaya teşvik eden yüksek etkileşimli polisiye sorgu formatı.',
-      tags: ['sorgu odasi', 'polisiye dizi', 'katil kim', 'interaktif video'],
+      summary: 'Karakol sorgu odası konseptinde, şüphelilerin sorgulandığı ve cevabın izleyiciye bırakıldığı interaktif polisiye dizi.',
+      tags: ['sorgu odasi', 'polisiye dizi', 'katil kim'],
       domainSpecifics: {
         titleIdeas: [
-          'Şüphelilerden Biri Yalan Söylüyor: 10 Saniyede Bulabilir misin?',
-          'Sorgu Odası #1: Milyonerin Son Akşam Yemeği'
+          'Sorgu Odası #1: Şüphelilerden Biri Yalan Söylüyor! Katil Kim?',
+          'Cevabı Yorumlara Yazın: Katili Bir Sonraki Bölümde Açıklıyoruz!'
         ],
-        first30sHook: '"Dedektif hoş geldin. Masada 3 ifade var ama içlerinden biri az önce cinayet işledi. Bakalım yalanı yakalayabilecek misin?"',
-        automationWorkflow: {
-          voiceover: 'Sert detektif ses tonu + 3 farklı şüpheli karakter sesi (ElevenLabs)',
-          visuals: 'Loş sorgu odası masası, tek lamba ışığı, polis kanıt dosyaları'
-        }
+        first30sHook: '"Dedektif hoş geldin. Odadaki 3 şüpheliden biri cinayeti işledi. Çelişkiyi bulup katili tahmin edebilir misin?"'
       },
       checklist: [
-        { id: 'c21', text: '3 şüphelinin çelişkili ifadelerini senaryolaştır', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c22', text: '10 saniyelik geri sayım ses ve görsel efektini hazırla', done: false, tool: 'CapCut', priority: 'high' },
-        { id: 'c23', text: 'Kapakta şüphelinin yüzü ve kırmızı büyüteç kullan', done: false, tool: 'Canva', priority: 'medium' }
+        { id: 'c27', text: 'Sorgu odası senaryosu ve 3 şüpheli çelişkisini kurgula', done: false, tool: 'Cursor', priority: 'high' },
+        { id: 'c28', text: 'Dedektif ve şüpheli seslendirmelerini üret', done: false, tool: 'ElevenLabs', priority: 'high' }
       ],
-      strategicNotes: 'Yorumlarda "Cevabı bulanlar yoruma yazsın" çağrısı algoritmayı tetikler.',
-      generatedAt: '2026-10-16T16:30:00.000Z'
-    }
-  },
-  {
-    id: 'yt-04',
-    title: 'Polisiye Dosyalar: 48 Saatte Çözülen İnanılmaz Şüpheli İtirafları',
-    rawInput: 'Gerçek polis kayıtları ve sorgu psikolojisi. Dedektiflerin zanlıyı itirafa zorladığı kilit taktikler.',
-    domain: 'youtube_automation',
-    status: 'inbox',
-    priority: 'medium',
-    tags: ['youtube automation', 'gercek polisiye', 'sorgu taktikleri', 'belgesel'],
-    createdAt: '2026-10-23T11:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Kriminoloji ve sorgu psikolojisi odaklı mini belgesel video projesi.',
-      tags: ['sorgu psikolojisi', 'reid teknigi', 'gercek polisiye'],
-      domainSpecifics: {
-        titleIdeas: ['Polisler Yalanı Nasıl Anlar? En Ünlü Sorgu Taktikleri']
-      },
-      checklist: [
-        { id: 'c24', text: 'FBI ve polis sorgu dökümlerinden 3 gerçek örnek bul', done: false, tool: 'Google', priority: 'medium' }
-      ],
-      generatedAt: '2026-10-23T11:30:00.000Z'
-    }
-  },
-  {
-    id: 'yt-05',
-    title: 'Karanlık Oda İtirafları: Anonim Olarak Gelen En Ürkütücü Ses Kaydı',
-    rawInput: 'Eski bir radyo frekansından kaydedilen ya da telesekretere bırakılan gizemli itiraf sesleri.',
-    domain: 'youtube_automation',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['youtube automation', 'korku itiraf', 'gizemli sesler', 'gece videolari'],
-    createdAt: '2026-10-27T18:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Gece saatlerinde izlenmeye uygun, tüyler ürpertici gizem ve itiraf kurgusu.',
-      tags: ['korku hikayeleri', 'gizemli itiraflar', 'karanlik video'],
-      domainSpecifics: {
-        niche: 'Korku & Gizem Hikaye Anlatımı'
-      },
-      checklist: [
-        { id: 'c25', text: 'Telesekreter bip ve distorsiyon ses efektlerini ayarla', done: false, tool: 'CapCut', priority: 'medium' }
-      ],
-      generatedAt: '2026-10-27T18:30:00.000Z'
-    }
-  },
-  {
-    id: 'yt-06',
-    title: 'İnteraktif Sorgu Odası: Şüpheli Beden Dili & Yalan Analizi Dizi Serisi',
-    rawInput: 'Beden dili uzmanlarının göz kırpma, mikro mimik ve ses titremesinden yalanı yakalama rehberi.',
-    domain: 'youtube_automation',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['youtube automation', 'beden dili', 'yalan analizi', 'sorgu'],
-    createdAt: '2026-10-24T14:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: true,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Kullanıcının kendi günlük hayatında da uygulayabileceği mikro mimik analizleri.',
-      tags: ['mikro mimikler', 'beden dili rehberi', 'yalan testi'],
-      domainSpecifics: {
-        titleIdeas: ['Birinin Yalan Söylediğini Gösteren 4 Mikro Mimik']
-      },
-      checklist: [
-        { id: 'c26', text: 'Paul Ekman mikro mimik araştırmasından grafikler hazırla', done: false, tool: 'Canva', priority: 'medium' }
-      ],
-      generatedAt: '2026-10-24T14:30:00.000Z'
-    }
-  },
-  {
-    id: 'yt-07',
-    title: 'Hatalar ve Pişmanlıklar: Hayatını Mahveden Tek Bir Karar',
-    rawInput: 'Tek bir yanlış karar yüzünden servetini veya ailesini kaybeden insanların dramatik ders hikayeleri.',
-    domain: 'youtube_automation',
-    status: 'inbox',
-    priority: 'medium',
-    tags: ['youtube automation', 'hayat dersleri', 'pismanlik hikayesi', 'felsefi video'],
-    createdAt: '2026-10-11T15:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Dramatik ve ibretlik hikaye kurgusu ile yüksek izlenme süresi yakalayan format.',
-      tags: ['hayat hatalari', 'dramatik hikaye', 'motivasyon'],
-      domainSpecifics: {
-        titleIdeas: ['Hayatının En Büyük Hatasını 3 Saniyede Yaptı']
-      },
-      checklist: [
-        { id: 'c27', text: 'Script ve kurgu taslağını oluştur', done: false, tool: 'YouTube', priority: 'high' }
-      ],
-      generatedAt: '2026-10-11T15:30:00.000Z'
+      generatedAt: '2026-05-30T00:30:00.000Z'
     }
   },
 
-  // --- 3 INDONESIA MARKET PROJECTS ---
+  // --- 1 INDONESIA PROJECT ---
   {
     id: 'indo-01',
-    title: 'Sejarah Indonesia Bergambar untuk Anak (Nusantara Tarihi Çocuk Kitabı)',
-    rawInput: 'Endonezya adalarının kuruluş efsaneleri, Majapahit ve Sriwijaya krallıklarının çocuklara yönelik renkli resimli hikaye kitabı.',
-    domain: 'indonesia',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['indonesia', 'buku anak', 'amazon kdp', 'sejarah indonesia', 'shopee id'],
-    createdAt: '2026-10-19T10:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: true,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Endonezyalı ebeveynler için milli kültür ve tarih bilincini masallarla aşılayan Amazon KDP resimli çocuk kitabı.',
-      tags: ['buku bergambar', 'sejarah nusantara', 'kdp indonesia', 'edukasi anak'],
-      domainSpecifics: {
-        niche: 'Buku Anak & Edukasi Budaya Nusantara',
-        productType: 'Amazon KDP Hardcover 8.5x8.5 inç ve Shopee/Tokopedia PDF',
-        targetAudience: 'Endonezyalı ebeveynler, ilkokul öğretmenleri, Endonezya diasporası',
-        tags: ['#bukuAnak', '#ceritaSejarah', '#shopeeID', '#edukasiKeluarga'],
-        designConcept: 'Canlı tropik renkler, batik desenli kıyafetler, çocuksu sıcak illüstrasyon stili.',
-        competitionInsight: 'Shopee ve Tokopedia üzerinde yerel fiyat (Rp 65.000 - Rp 95.000) ile doğrudan dijital download sunun.'
-      },
-      checklist: [
-        { id: 'c28', text: 'Midjourney v6 ile 16 adet Endonezya ada illüstrasyonu üret', done: false, tool: 'Midjourney', priority: 'high' },
-        { id: 'c29', text: 'Bahasa Indonesia basit metinleri yerel redaktör formatında kontrol et', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c30', text: 'KDP formatında PDF bleed ve kapak dosyasını derle', done: false, tool: 'Canva', priority: 'high' }
-      ],
-      strategicNotes: 'Endonezya 280 milyonluk nüfusuyla Güneydoğu Asya’nın en hızlı büyüyen çocuk yayıncılığı pazarıdır.',
-      generatedAt: '2026-10-19T10:30:00.000Z'
-    }
-  },
-  {
-    id: 'indo-02',
-    title: 'Cerita Rakyat Nusantara: 10 Adanın Efsanevi Masalları (Shopee/Tokopedia)',
-    rawInput: 'Malin Kundang, Danau Toba, Roro Jonggrang gibi 10 popüler ada efsanesinin modern pedagojik anlatımı.',
+    title: 'Endonezya tarihi kitabi',
+    rawInput: 'Endonezce tarih kitabı çocuklar için. 1 sayfası görsel, yanındaki sayfada olayın özeti var.',
     domain: 'indonesia',
     status: 'inbox',
     priority: 'medium',
-    tags: ['indonesia', 'cerita rakyat', 'danau toba', 'tokopedia digital'],
-    createdAt: '2026-10-26T12:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Tokopedia ve Shopee dijital ürün mağazalarında satılacak sesli masal ve interaktif PDF paketi.',
-      tags: ['dongeng nusantara', 'malin kundang', 'buku dongeng digital'],
-      domainSpecifics: {
-        niche: 'Dijital Çocuk Masalları & Sesli Kitap'
-      },
-      checklist: [
-        { id: 'c31', text: '10 halk masalının özetlerini çıkar', done: false, tool: 'Cursor', priority: 'medium' }
-      ],
-      generatedAt: '2026-10-26T12:30:00.000Z'
-    }
-  },
-  {
-    id: 'indo-03',
-    title: 'Endonezya Vahşi Yaşam & Kültür Çocuk Etkinlik Kitabı (Amazon KDP)',
-    rawInput: 'Komodo ejderi, Sumatra kaplanı ve orangutan çizimleri içeren labirent, bulmaca ve boyama kitabı.',
-    domain: 'indonesia',
-    status: 'inbox',
-    priority: 'low',
-    tags: ['indonesia', 'buku mewarnai', 'coloring book kdp', 'satwa nusantara'],
-    createdAt: '2026-10-29T14:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Düşük üretim maliyetli, siyah beyaz iç sayfalı KDP boyama ve etkinlik kitabı.',
-      tags: ['buku aktivitas anak', 'satwa langka indonesia', 'kdp activity book'],
-      domainSpecifics: {
-        niche: 'Etkinlik & Boyama Kitapları'
-      },
-      checklist: [
-        { id: 'c32', text: '30 adet siyah beyaz boyama çizimini hazırla', done: false, tool: 'Midjourney', priority: 'medium' }
-      ],
-      generatedAt: '2026-10-29T14:30:00.000Z'
-    }
-  },
-
-  // --- 3 AI APPS & MICRO-SAAS PROJECTS ---
-  {
-    id: 'ai-01',
-    title: 'OmniFocus Quick-Capture: Sesli Notu Aksiyon Planına Çeviren Micro-SaaS',
-    rawInput: 'Kullanıcının tek tuşla sesli düşüncelerini kaydedip 10 saniyede yapılandırılmış Kanban görevlerine dönüştüren web aracı.',
-    domain: 'ai_apps',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['ai apps', 'micro saas', 'gemini api', 'audio to action', 'productivity'],
-    createdAt: '2026-10-13T09:00:00.000Z',
+    tags: ['indonesia', 'endonezya tarihi kitabi', 'buku sejarah anak', 'shopee id', 'tokopedia'],
+    createdAt: '2026-05-30T00:00:00.000Z',
     updatedAt: '2026-11-03T10:00:00.000Z',
     isFavorite: true,
     maturityScore: 20,
     actionPlan: {
-      summary: 'Solopreneur ve içerik üreticileri için ses kaydını yapılandırılmış JSON çıktısıyla planlayan üretkenlik aracı.',
-      tags: ['ai productivity', 'voice capture', 'micro saas', 'gemini 3.8 flash'],
+      summary: 'Çocuklar için Bahasa Indonesia dilinde hazırlanan, sol sayfasında resim sağ sayfasında özet metin bulunan Endonezya tarihi kitabı.',
+      tags: ['buku sejarah anak', 'sejarah indonesia', 'shopee indonesia'],
       domainSpecifics: {
-        problemStatement: 'Yaratıcı insanların fikirleri akıllarına geldikleri anda kaydedilmezse kayboluyor; not defterleri ise aksiyonsuz çöplüğe dönüyor.',
-        coreSolution: 'Web Audio API + Gemini 3.8 Flash modeliyle sesi anında metne döküp sektöre özel aksiyon planına dönüştüren tek pencereli dashboard.',
-        targetPersona: 'Etsy satıcıları, YouTube kanal sahipleri, bağımsız yazılımcılar (Solopreneurs)',
-        techStack: {
-          frontend: 'React 19 + Vite + Tailwind CSS v4',
-          backend: 'Express Node.js proxy',
-          aiEngine: 'Google Gemini 3.8 Flash',
-          database: 'Supabase PostgreSQL + Local Storage Fallback'
-        },
-        mvpFeatures: [
-          '1. Cmd+K ile evrensel sesli/metin hızlı fikir yakalama',
-          '2. Gemini ile 4 sektöre özel aksiyon planı ve görev listesi üretimi',
-          '3. Sıfır kesintili yerel ve bulut senkronizasyonu'
-        ],
-        monetizationIdea: 'Aylık $9 Pro plan (Sınırsız Gemini API analizi ve pazar araştırması).'
+        niche: 'Endonezya Eğitim & Çocuk Tarih Kitabı',
+        productType: 'Amazon KDP & Shopee/Tokopedia PDF Dijital İndirme',
+        targetAudience: 'Endonezyalı ebeveynler, ilkokul öğrencileri ve öğretmenler'
       },
       checklist: [
-        { id: 'c33', text: 'Supabase PostgreSQL şemasını ve RLS kurallarını doğrula', done: false, tool: 'Supabase', priority: 'high' },
-        { id: 'c34', text: 'Ses kaydı ve Gemini transkripsiyon hattını test et', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c35', text: 'Landing page ve ProductHunt lansman metnini hazırla', done: false, tool: 'Figma', priority: 'medium' }
+        { id: 'c29', text: 'Endonezya tarihi 20 kilit olayın resimlerini üret', done: false, tool: 'Midjourney', priority: 'high' },
+        { id: 'c30', text: 'Bahasa Indonesia özet metinlerini tamamla', done: false, tool: 'Cursor', priority: 'high' }
       ],
-      strategicNotes: 'Karmaşık ayarlar yerine ilk 5 saniyede çalışan sade akış kullanıcıyı tutundurur.',
-      generatedAt: '2026-10-13T09:30:00.000Z'
-    }
-  },
-  {
-    id: 'ai-02',
-    title: 'Etsy Auto-Listing SEO & 20 Görsel Prompt Üretici AI Motoru',
-    rawInput: 'Etsy satıcıları için ürün başlığını, 13 etiketini ve Midjourney için 20 slotluk görsel prompt setini tek tıkla üreten yapay zeka aracı.',
-    domain: 'ai_apps',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['ai apps', 'etsy seo tool', 'midjourney prompts', 'listing generator'],
-    createdAt: '2026-10-17T14:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: true,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'Etsy POD satıcılarının ürün başına 1 saatlik listeleme ve mockup hazırlık süresini 2 dakikaya indiren otomasyon.',
-      tags: ['etsy automation', 'midjourney prompt generator', 'pod tools'],
-      domainSpecifics: {
-        problemStatement: 'Etsy’de başarılı bir listeleme için 13 etiket, 140 karakterlik başlık ve 20 farklı görsel açısı gerekiyor; bu da üretimi yavaşlatıyor.',
-        coreSolution: 'Tek bir ürün fikrinden 20 adet Midjourney promptu, infografik şablonu ve SEO uyumlu açıklama metni üreten motor.',
-        techStack: {
-          frontend: 'React + Tailwind',
-          aiEngine: 'Gemini 3.8 Flash Structured JSON'
-        }
-      },
-      checklist: [
-        { id: 'c36', text: 'Etsy SEO kurallarına uygun 140 karakter ve 13 etiket promptunu optimize et', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c37', text: 'Midjourney v6 için 20 slotluk prompt şablonlarını test et', done: false, tool: 'Midjourney', priority: 'high' }
-      ],
-      generatedAt: '2026-10-17T14:30:00.000Z'
-    }
-  },
-  {
-    id: 'ai-03',
-    title: 'Faceless YouTube Script & Storyboard Otomasyon Aracı (Gemini API)',
-    rawInput: 'Viral YouTube konuları için ilk 30 saniye kancası, 5 adımlı script omurgası ve CapCut için B-roll yönergeleri oluşturan web aracı.',
-    domain: 'ai_apps',
-    status: 'inbox',
-    priority: 'high',
-    tags: ['ai apps', 'youtube scriptwriter', 'faceless automation', 'storyboard ai'],
-    createdAt: '2026-10-11T12:00:00.000Z',
-    updatedAt: '2026-11-03T10:00:00.000Z',
-    isFavorite: false,
-    maturityScore: 20,
-    actionPlan: {
-      summary: 'YouTube otomasyon kanallarının senaryo yazım ve storyboard hazırlık sürecini uçtan uca otomatikleştiren araç.',
-      tags: ['youtube ai tool', 'script outline generator', 'b-roll prompt ai'],
-      domainSpecifics: {
-        problemStatement: 'Faceless kanallarda izlenme tutunmasını sağlayacak psikolojik kanca yazımı zaman alıyor.',
-        coreSolution: 'Tıkla-ve-üret senaryo omurgası ve ElevenLabs zamanlamalı sahne dökümü.'
-      },
-      checklist: [
-        { id: 'c38', text: 'Kanca ve sahne akış algoritmasını tamamla', done: false, tool: 'Cursor', priority: 'high' },
-        { id: 'c39', text: 'Canlı sisteme dahil edildi', done: false, tool: 'Gemini API', priority: 'high' }
-      ],
-      generatedAt: '2026-10-11T12:30:00.000Z'
+      generatedAt: '2026-05-30T00:30:00.000Z'
     }
   }
 ];
@@ -641,14 +603,15 @@ export const getStoredIdeas = (): IdeaItem[] => {
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length === 21 && parsed.some(i => i.title === 'Etsy Affirmation Poster-Calendar')) {
         return parsed;
       }
     } catch (e) {
       console.warn('LocalStorage parse warning:', e);
     }
   }
-  // If no ideas exist yet in browser storage, immediately seed the 21 real projects
+
+  // Force re-seed exact 21 user projects
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(REAL_USER_PROJECTS));
   } catch (e) {
@@ -787,7 +750,6 @@ export function rowToIdeaItem(row: any): IdeaItem {
 // SUPABASE CRUD OPERATIONS WITH LOCAL FALLBACK
 // -------------------------------------------------------------
 export const subscribeToIdeas = (userId: string, callback: (ideas: IdeaItem[]) => void) => {
-  // 1. Immediately emit stored ideas (21 real projects if fresh) so user NEVER sees empty state
   const cached = getStoredIdeas();
   if (cached.length > 0) {
     callback(cached);
@@ -806,18 +768,17 @@ export const subscribeToIdeas = (userId: string, callback: (ideas: IdeaItem[]) =
         callback(getStoredIdeas());
         return;
       }
-      if (data && data.length > 0) {
+      if (data && data.length > 0 && data.some((r: any) => r.title === 'Etsy Affirmation Poster-Calendar')) {
         const ideas = data.map(rowToIdeaItem);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
         callback(ideas);
-      } else if (cached.length > 0) {
-        // Sync cached ideas to Supabase in the background
-        for (const item of cached) {
+      } else {
+        // Sync exact 21 user projects to Supabase if database is empty or has old filler schema
+        for (const item of REAL_USER_PROJECTS) {
           supabase.from('ideas').upsert(ideaItemToRow(userId, item)).then();
         }
-        callback(cached);
-      } else {
-        callback(getStoredIdeas());
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(REAL_USER_PROJECTS));
+        callback(REAL_USER_PROJECTS);
       }
     } catch (err) {
       console.warn('Querying ideas fallback to local storage:', err);
@@ -827,7 +788,6 @@ export const subscribeToIdeas = (userId: string, callback: (ideas: IdeaItem[]) =
 
   fetchIdeas();
 
-  // Supabase Realtime channel subscription
   try {
     const channel = supabase
       .channel(`ideas_realtime_${userId}_${Math.random().toString(36).substring(2, 9)}`)
@@ -854,7 +814,6 @@ export const subscribeToIdeas = (userId: string, callback: (ideas: IdeaItem[]) =
 };
 
 export const saveIdeaToSupabase = async (userId: string, idea: IdeaItem) => {
-  // Always update local cache first for zero latency
   saveLocalIdea(idea);
 
   try {
@@ -890,7 +849,6 @@ export const deleteIdeaFromSupabase = async (userId: string, ideaId: string) => 
   }
 };
 
-// Aliases for backwards compatibility
 export const saveIdeaToFirebase = saveIdeaToSupabase;
 export const deleteIdeaFromFirebase = deleteIdeaFromSupabase;
 

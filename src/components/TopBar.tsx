@@ -1,4 +1,4 @@
-import { Mic, Plus, Sparkles, Download, Layers, Bell, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Mic, Plus, Sparkles, Download, Layers, Bell, Settings as SettingsIcon, LogOut, Zap } from 'lucide-react';
 import { DomainType } from '../types';
 
 interface TopBarProps {
@@ -11,6 +11,8 @@ interface TopBarProps {
   pendingRemindersCount?: number;
   onSignOut?: () => void;
   userEmail?: string | null;
+  deepWorkMode?: boolean;
+  onToggleDeepWorkMode?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -22,7 +24,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeDomain,
   pendingRemindersCount = 0,
   onSignOut,
-  userEmail
+  userEmail,
+  deepWorkMode,
+  onToggleDeepWorkMode
 }) => {
   const domainLabels: Record<string, string> = {
     all: 'Tüm Projeler',
@@ -74,6 +78,21 @@ export const TopBar: React.FC<TopBarProps> = ({
           <Download className="w-3.5 h-3.5 text-slate-400" />
           <span className="hidden sm:inline">Dışarı Aktar</span>
         </button>
+
+        {onToggleDeepWorkMode && (
+          <button
+            onClick={onToggleDeepWorkMode}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all whitespace-nowrap cursor-pointer ${
+              deepWorkMode 
+                ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 hover:bg-indigo-600/50 shadow-sm' 
+                : 'text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60'
+            }`}
+            title="Deep Work (Odaklanma & Tam Ekran Modu) Aç/Kapat"
+          >
+            <Zap className={`w-3.5 h-3.5 ${deepWorkMode ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">{deepWorkMode ? 'Deep Work (Aktif)' : 'Deep Work'}</span>
+          </button>
+        )}
 
         {onOpenSettings && (
           <button

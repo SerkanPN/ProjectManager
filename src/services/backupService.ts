@@ -17,6 +17,7 @@ export function getSettings(): Settings {
         lastBackupTimestamp: parsed.lastBackupTimestamp,
         lastDriveBackupTimestamp: parsed.lastDriveBackupTimestamp,
         isDriveBackupEnabled: !!parsed.isDriveBackupEnabled,
+        deepWorkMode: !!parsed.deepWorkMode,
       };
     }
   } catch (e) {
@@ -29,6 +30,7 @@ export function getSettings(): Settings {
     autoBackupEnabled: true,
     autoBackupIntervalMinutes: 1,
     isDriveBackupEnabled: false,
+    deepWorkMode: false,
   };
 }
 

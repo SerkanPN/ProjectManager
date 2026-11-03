@@ -63,6 +63,18 @@ export default function App() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Deep Work (Focus Mode) State
+  const [deepWorkMode, setDeepWorkMode] = useState<boolean>(
+    () => getSettings().deepWorkMode || false
+  );
+
+  const handleToggleDeepWorkMode = (enabled?: boolean) => {
+    const nextVal = enabled !== undefined ? enabled : !deepWorkMode;
+    setDeepWorkMode(nextVal);
+    const current = getSettings();
+    saveSettings({ ...current, deepWorkMode: nextVal });
+  };
+
   // Modals state
   const [isQuickCaptureOpen, setIsQuickCaptureOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState<IdeaItem | null>(null);
@@ -392,18 +404,22 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <TopBar
-        onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
-        onOpenExport={() => setIsExportOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenKeywords={() => setIsKeywordsOpen(true)}
-        totalIdeasCount={ideas.length}
-        activeDomain={activeDomain}
-        pendingRemindersCount={pendingRemindersCount}
-        onSignOut={handleSignOut}
-        userEmail={user?.email}
-      />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
+      <div className={`transition-all duration-500 ${deepWorkMode && selectedIdea ? 'filter blur-sm opacity-40 pointer-events-none' : ''}`}>
+        <TopBar
+          onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
+          onOpenExport={() => setIsExportOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenKeywords={() => setIsKeywordsOpen(true)}
+          totalIdeasCount={ideas.length}
+          activeDomain={activeDomain}
+          pendingRemindersCount={pendingRemindersCount}
+          onSignOut={handleSignOut}
+          userEmail={user?.email}
+          deepWorkMode={deepWorkMode}
+          onToggleDeepWorkMode={handleToggleDeepWorkMode}
+        />
+      </div>
 
       {/* Pipeline Floating Status Bar */}
       {pipelineProgress && (
@@ -424,7 +440,9 @@ export default function App() {
         </div>
       )}
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 flex overflow-hidden transition-all duration-500 ${
+        deepWorkMode && selectedIdea ? 'filter blur-md opacity-25 pointer-events-none scale-[0.99] origin-center' : ''
+      }`}>
         <Sidebar
           activeDomain={activeDomain}
           onSelectDomain={(d) => {
@@ -518,6 +536,8 @@ export default function App() {
         onSpawnNewIdea={(data) => handleSaveNewIdea({ ...data, priority: 'medium', generateActionPlanImmediately: true })}
         ideasPool={ideas}
         onRunPipeline={handleRunFullPipeline}
+        isDeepWorkMode={deepWorkMode}
+        onToggleDeepWorkMode={handleToggleDeepWorkMode}
       />
 
       <KeywordRepositoryModal
@@ -547,6 +567,8 @@ export default function App() {
         }}
         user={user}
         accessToken={accessToken}
+        deepWorkMode={deepWorkMode}
+        onToggleDeepWorkMode={handleToggleDeepWorkMode}
       />
 
       <ReminderBanner

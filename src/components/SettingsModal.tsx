@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Key, Shield, Download, Upload, RotateCcw, Save, Plus, Trash2, Check, AlertCircle, RefreshCw, Database, Globe, Copy } from 'lucide-react';
+import { X, Key, Shield, Download, Upload, RotateCcw, Save, Plus, Trash2, Check, AlertCircle, RefreshCw, Database, Globe, Copy, Zap, Maximize2 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { Settings, BackupItem, IdeaItem } from '../types';
 import { getSettings, saveSettings, getBackupHistory, createLocalBackupSnapshot, downloadJsonFile, exportAllDataAsJson, importDataFromJson } from '../services/backupService';
@@ -11,6 +11,8 @@ interface SettingsModalProps {
   onRestoreIdeas: (ideas: IdeaItem[]) => void;
   user: User | null;
   accessToken: string | null;
+  deepWorkMode?: boolean;
+  onToggleDeepWorkMode?: (enabled: boolean) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -19,7 +21,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   ideas,
   onRestoreIdeas,
   user,
-  accessToken
+  accessToken,
+  deepWorkMode,
+  onToggleDeepWorkMode
 }) => {
   const [settings, setSettingsState] = useState<Settings>(getSettings());
   const [newApiKey, setNewApiKey] = useState('');
@@ -186,6 +190,67 @@ create table if not exists seasonal_automation_log (
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-6">
+          {/* Section 0: Deep Work (Focus Mode) */}
+          <div className="bg-slate-950/80 rounded-xl p-4 border border-indigo-500/30 space-y-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Deep Work (Odaklanma Modu)</h3>
+                  <p className="text-[11px] text-slate-400">Kesintisiz odaklanma ve tam ekran çalışma deneyimi</p>
+                </div>
+              </div>
+              <span className={`text-[11px] font-mono px-2.5 py-1 rounded-md border font-semibold ${settings.deepWorkMode ? 'text-indigo-300 bg-indigo-500/20 border-indigo-500/40' : 'text-slate-400 bg-slate-800 border-slate-700'}`}>
+                {settings.deepWorkMode ? '⚡ AKTİF' : 'PASİF'}
+              </span>
+            </div>
+            
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Aktif olduğunda, çalışma alanındaki aktif olmayan tüm elemanları bulanıklaştırır (blur effect) ve seçilen fikri tam ekran (fullscreen focus) görünümüne taşır.
+            </p>
+
+            <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-3">
+                <div 
+                  className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${settings.deepWorkMode ? 'bg-indigo-600' : 'bg-slate-700'}`}
+                  onClick={() => {
+                    const nextVal = !settings.deepWorkMode;
+                    const newSettings = { ...settings, deepWorkMode: nextVal };
+                    setSettingsState(newSettings);
+                    saveSettings(newSettings);
+                    if (onToggleDeepWorkMode) onToggleDeepWorkMode(nextVal);
+                  }}
+                >
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.deepWorkMode ? 'left-6' : 'left-1'}`} />
+                </div>
+                <div>
+                  <span className="text-xs text-slate-200 font-semibold block">Deep Work Modunu Aç/Kapat</span>
+                  <span className="text-[11px] text-slate-400">Arka plan bulanıklaştırması & Tam Ekran Fikir İnceleme</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const nextVal = !settings.deepWorkMode;
+                  const newSettings = { ...settings, deepWorkMode: nextVal };
+                  setSettingsState(newSettings);
+                  saveSettings(newSettings);
+                  if (onToggleDeepWorkMode) onToggleDeepWorkMode(nextVal);
+                }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                  settings.deepWorkMode 
+                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-md' 
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                }`}
+              >
+                {settings.deepWorkMode ? 'Kapat' : 'Aktif Et'}
+              </button>
+            </div>
+          </div>
+
           {/* Section 1: API Key Pool & Model */}
           <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-4">
             <div className="flex items-center justify-between">

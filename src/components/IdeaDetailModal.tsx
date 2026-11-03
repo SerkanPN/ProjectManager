@@ -4,7 +4,8 @@ import {
   CheckSquare, Square, Plus, Trash2, Star, ExternalLink, RefreshCw,
   Bell, Clock, Calendar, AlertTriangle, Layers, FileText, Image, 
   Palette, GitFork, Gauge, Flame, ArrowRight, ShieldCheck, Download,
-  TrendingUp, BarChart2, CheckCircle2, ChevronRight, Mic, MicOff, Play, Volume2, Link
+  TrendingUp, BarChart2, CheckCircle2, ChevronRight, Mic, MicOff, Play, Volume2, Link,
+  Zap, Maximize2, Minimize2
 } from 'lucide-react';
 import { 
   IdeaItem, StatusType, PriorityType, ChecklistItem, DomainType, Reminder,
@@ -28,6 +29,8 @@ interface IdeaDetailModalProps {
   onSpawnNewIdea?: (newIdea: { title: string; rawInput: string; domain: DomainType; parentId?: string }) => void;
   ideasPool: IdeaItem[];
   onRunPipeline?: (idea: IdeaItem) => Promise<void>;
+  isDeepWorkMode?: boolean;
+  onToggleDeepWorkMode?: () => void;
 }
 
 type TabType = 'plan' | 'research' | 'listing' | 'visuals' | 'design_brief' | 'sub_ideas';
@@ -42,7 +45,9 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
   isGeneratingPlan,
   onSpawnNewIdea,
   ideasPool,
-  onRunPipeline
+  onRunPipeline,
+  isDeepWorkMode,
+  onToggleDeepWorkMode
 }) => {
   if (!isOpen || !idea) return null;
 
@@ -514,14 +519,33 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
+      isDeepWorkMode 
+        ? 'p-0 bg-slate-950/95 backdrop-blur-xl animate-in fade-in' 
+        : 'p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150'
+    }`}>
       <div 
-        className="w-full max-w-5xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden max-h-[94vh] flex flex-col"
+        className={`flex flex-col overflow-hidden transition-all duration-300 ${
+          isDeepWorkMode 
+            ? 'w-full h-full max-w-none max-h-screen rounded-none border-none bg-slate-950 shadow-2xl' 
+            : 'w-full max-w-5xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl max-h-[94vh]'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 bg-slate-950/60">
+        <div className={`flex items-center justify-between px-6 py-3.5 border-b transition-colors ${
+          isDeepWorkMode 
+            ? 'bg-gradient-to-r from-slate-950 via-indigo-950/50 to-slate-950 border-indigo-500/30' 
+            : 'border-slate-800 bg-slate-950/60'
+        }`}>
           <div className="flex items-center gap-3">
+            {isDeepWorkMode && (
+              <div className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-indigo-300 bg-indigo-500/20 border border-indigo-500/40 rounded-full animate-pulse shadow-sm">
+                <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Deep Work Odak Modu</span>
+              </div>
+            )}
+
             <span className={`px-2.5 py-1 text-xs font-medium rounded-md border flex items-center gap-1.5 ${domainBadge}`}>
               <DomainIcon className="w-3.5 h-3.5" />
               <span>{domainLabel}</span>
@@ -560,6 +584,30 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onToggleDeepWorkMode && (
+              <button
+                onClick={onToggleDeepWorkMode}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                  isDeepWorkMode 
+                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-400 shadow-md' 
+                    : 'text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border-slate-700'
+                }`}
+                title={isDeepWorkMode ? 'Tam ekrandan çık' : 'Deep Work (Tam Ekran Modu)'}
+              >
+                {isDeepWorkMode ? (
+                  <>
+                    <Minimize2 className="w-3.5 h-3.5 text-indigo-200" />
+                    <span>Tam Ekrandan Çık</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Deep Work</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {onRunPipeline && (
               <button
                 onClick={async () => {
