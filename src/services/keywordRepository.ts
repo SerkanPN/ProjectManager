@@ -12,11 +12,34 @@ export interface KeywordRecord {
   weight: number;
 }
 
+const KEYWORDS_STORAGE_KEY = 'omnifocus_keywords_cache_v1';
+
+export const getLocalKeywords = (): KeywordRecord[] => {
+  try {
+    const raw = localStorage.getItem(KEYWORDS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.warn('LocalStorage keyword cache read warning:', e);
+  }
+  return [];
+};
+
+export const saveLocalKeywords = (kws: KeywordRecord[]) => {
+  try {
+    localStorage.setItem(KEYWORDS_STORAGE_KEY, JSON.stringify(kws));
+  } catch (e) {
+    console.warn('LocalStorage keyword cache write warning:', e);
+  }
+};
+
 export const saveKeywordsToSupabase = async (
   userId: string,
   keywords: Array<Omit<KeywordRecord, 'user_id'> | Partial<KeywordRecord>>
 ) => {
-  const rows = keywords.map((k) => ({
+  const rows: KeywordRecord[] = keywords.map((k) => ({
     id: k.id || `kw-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     user_id: userId,
     keyword: k.keyword || '',
@@ -26,6 +49,11 @@ export const saveKeywordsToSupabase = async (
     uploaded_at: k.uploaded_at || new Date().toISOString(),
     weight: Number(k.weight ?? 1.0),
   }));
+
+  // Update local cache immediately
+  const existing = getLocalKeywords();
+  const merged = [...rows, ...existing.filter(e => !rows.some(r => r.id === e.id))];
+  saveLocalKeywords(merged);
 
   try {
     const { data, error } = await supabase
@@ -47,6 +75,12 @@ export const subscribeToKeywords = (
   userId: string,
   callback: (keywords: KeywordRecord[]) => void
 ) => {
+  // Always emit local cached keywords first for instant zero-latency load
+  const cached = getLocalKeywords();
+  if (cached.length > 0) {
+    callback(cached);
+  }
+
   const fetchKeywords = async () => {
     try {
       const { data, error } = await supabase
@@ -56,44 +90,55 @@ export const subscribeToKeywords = (
         .order('search_volume', { ascending: false });
 
       if (error) {
-        console.error('Error fetching keywords from Supabase:', error);
+        console.warn('Supabase keywords fetch notice (falling back to local cache):', error.message || error);
+        callback(getLocalKeywords());
         return;
       }
-      if (data) {
+      if (data && Array.isArray(data)) {
+        saveLocalKeywords(data as KeywordRecord[]);
         callback(data as KeywordRecord[]);
+      } else {
+        callback(getLocalKeywords());
       }
     } catch (err) {
-      console.error('Failed to query keywords:', err);
+      console.warn('Failed to query keywords, using local storage cache:', err);
+      callback(getLocalKeywords());
     }
   };
 
   fetchKeywords();
 
-  const channel = supabase
-    .channel(`keywords_realtime_${userId}_${Math.random().toString(36).substring(2, 8)}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'keywords',
-        filter: `user_id=eq.${userId}`,
-      },
-      () => {
-        fetchKeywords();
-      }
-    )
-    .subscribe();
+  try {
+    const channel = supabase
+      .channel(`keywords_realtime_${userId}_${Math.random().toString(36).substring(2, 8)}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'keywords',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          fetchKeywords();
+        }
+      )
+      .subscribe();
 
-  return () => {
-    supabase.removeChannel(channel);
-  };
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  } catch {
+    return () => {};
+  }
 };
 
 export const fetchRelevantKeywordsForIdea = async (
   userId: string,
   ideaText: string
 ): Promise<UserKeywordMetric[]> => {
+  let keywordsList: KeywordRecord[] = getLocalKeywords();
+
   try {
     const { data, error } = await supabase
       .from('keywords')
@@ -102,45 +147,54 @@ export const fetchRelevantKeywordsForIdea = async (
       .order('search_volume', { ascending: false })
       .limit(100);
 
-    if (error || !data || data.length === 0) {
-      return [];
+    if (!error && data && Array.isArray(data) && data.length > 0) {
+      keywordsList = data as KeywordRecord[];
+      saveLocalKeywords(keywordsList);
     }
-
-    const lowerIdea = (ideaText || '').toLowerCase();
-    const words = lowerIdea.split(/[\s,.-]+/).filter((w) => w.length > 2);
-
-    // Filter relevant keywords by checking if keyword matches words in ideaText
-    const matched = data.filter((row: KeywordRecord) => {
-      const kwLower = row.keyword.toLowerCase();
-      if (lowerIdea.includes(kwLower)) return true;
-      return words.some((w) => kwLower.includes(w));
-    });
-
-    const chosen = (matched.length > 0 ? matched : data.slice(0, 5)) as KeywordRecord[];
-
-    return chosen.slice(0, 10).map((row) => ({
-      keyword: row.keyword,
-      searchVolume: Number(row.search_volume),
-      competitionResults: Number(row.search_result),
-      conversionRate: Number(row.conversion_rate),
-      source: 'user_keyword_data',
-      notes: `Depodan eşleşti (Ağırlık: ${row.weight || 1.0})`,
-    }));
   } catch (err) {
-    console.error('Error in fetchRelevantKeywordsForIdea:', err);
+    console.warn('Error fetching keywords for idea, using local cache:', err);
+  }
+
+  if (!keywordsList || keywordsList.length === 0) {
     return [];
   }
+
+  const lowerIdea = (ideaText || '').toLowerCase();
+  const words = lowerIdea.split(/[\s,.-]+/).filter((w) => w.length > 2);
+
+  const matched = keywordsList.filter((row: KeywordRecord) => {
+    const kwLower = (row.keyword || '').toLowerCase();
+    if (lowerIdea.includes(kwLower)) return true;
+    return words.some((w) => kwLower.includes(w));
+  });
+
+  const chosen = (matched.length > 0 ? matched : keywordsList.slice(0, 5)) as KeywordRecord[];
+
+  return chosen.slice(0, 10).map((row) => ({
+    keyword: row.keyword,
+    searchVolume: Number(row.search_volume),
+    competitionResults: Number(row.search_result),
+    conversionRate: Number(row.conversion_rate),
+    source: 'user_keyword_data',
+    notes: `Depodan eşleşti (Ağırlık: ${row.weight || 1.0})`,
+  }));
 };
 
 export const deleteKeyword = async (userId: string, id: string) => {
-  const { error } = await supabase
-    .from('keywords')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+  const current = getLocalKeywords().filter(k => k.id !== id);
+  saveLocalKeywords(current);
 
-  if (error) {
-    console.error('Error deleting keyword:', error);
-    throw error;
+  try {
+    const { error } = await supabase
+      .from('keywords')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.warn('Error deleting keyword from Supabase:', error.message);
+    }
+  } catch (err) {
+    console.warn('Supabase keyword delete exception:', err);
   }
 };

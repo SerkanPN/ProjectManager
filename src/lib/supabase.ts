@@ -4,8 +4,8 @@ export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://wwpmys
 export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cG15c2NmZW1tdm5uY252eXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MTA1ODIsImV4cCI6MjEwOTI4NjU4Mn0._B1ZhIXlbaZigTHIYsl0TjmLPzfJ1-50kWBzz1WugBc';
 export const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cG15c2NmZW1tdm5uY252eXVyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzcxMDU4MiwiZXhwIjoyMTA5Mjg2NTgyfQ.gA7LBk1daX-x5wTy0RUgZpBij5PKYvbv01xN2bUVKaY';
 
-// We prioritize the key that allows unrestricted local single-user access
-const activeKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+// Standard anon key for browser PostgREST requests
+const activeKey = SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY;
 
 export const supabase = createClient(SUPABASE_URL, activeKey, {
   auth: {
