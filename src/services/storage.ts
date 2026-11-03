@@ -768,14 +768,14 @@ export const subscribeToIdeas = (userId: string, callback: (ideas: IdeaItem[]) =
         callback(getStoredIdeas());
         return;
       }
-      if (data && data.length > 0 && data.some((r: any) => r.title === 'Etsy Affirmation Poster-Calendar')) {
+      if (data && data.length > 0) {
         const ideas = data.map(rowToIdeaItem);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
         callback(ideas);
       } else {
         // Sync exact 21 user projects to Supabase if database is empty or has old filler schema
         for (const item of REAL_USER_PROJECTS) {
-          supabase.from('ideas').upsert(ideaItemToRow(userId, item)).then();
+          supabase.from('ideas').upsert(ideaItemToRow(userId, item)).then(() => {}).catch(() => {});
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(REAL_USER_PROJECTS));
         callback(REAL_USER_PROJECTS);

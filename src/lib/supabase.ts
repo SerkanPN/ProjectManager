@@ -1,19 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://wwpmyscfemmvnncnvyur.supabase.co';
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cG15c2NmZW1tdm5uY252eXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MTA1ODIsImV4cCI6MjEwOTI4NjU4Mn0._B1ZhIXlbaZigTHIYsl0TjmLPzfJ1-50kWBzz1WugBc';
-export const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3cG15c2NmZW1tdm5uY252eXVyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzcxMDU4MiwiZXhwIjoyMTA5Mjg2NTgyfQ.gA7LBk1daX-x5wTy0RUgZpBij5PKYvbv01xN2bUVKaY';
+export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+export const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-// Standard anon key for browser PostgREST requests
-const activeKey = SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY;
+export const isSupabaseConfigured = Boolean(
+  SUPABASE_URL && 
+  SUPABASE_ANON_KEY && 
+  !SUPABASE_URL.includes('placeholder')
+);
 
-export const supabase = createClient(SUPABASE_URL, activeKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+if (!isSupabaseConfigured) {
+  console.info('Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) are not set. Offline / LocalStorage mode active.');
+}
+
+export const supabase = createClient(
+  SUPABASE_URL || 'https://placeholder.supabase.co',
+  SUPABASE_ANON_KEY || 'placeholder-anon-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
 
 export const DEFAULT_USER = {
   id: 'omni_creator',

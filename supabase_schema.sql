@@ -59,31 +59,82 @@ create table if not exists seasonal_automation_log (
 -- ==========================================
 -- Row Level Security (RLS)
 -- ==========================================
+-- Hem oturum açmış kullanıcıları (auth.uid = user_id)
+-- hem de anon anahtarla bağlanan varsayılan çalışma alanını ('omni_creator') destekler.
 
 alter table ideas enable row level security;
 drop policy if exists "Kullanici kendi verisini gorur" on ideas;
-create policy "Kullanici kendi verisini gorur" on ideas
+drop policy if exists "Workspace access" on ideas;
+create policy "Workspace access" on ideas
   for all
-  using (user_id = auth.uid()::text)
-  with check (user_id = auth.uid()::text);
+  using (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  )
+  with check (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  );
 
 alter table keywords enable row level security;
 drop policy if exists "Kullanici kendi verisini gorur" on keywords;
-create policy "Kullanici kendi verisini gorur" on keywords
+drop policy if exists "Workspace access" on keywords;
+create policy "Workspace access" on keywords
   for all
-  using (user_id = auth.uid()::text)
-  with check (user_id = auth.uid()::text);
+  using (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  )
+  with check (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  );
 
 alter table pipeline_logs enable row level security;
 drop policy if exists "Kullanici kendi verisini gorur" on pipeline_logs;
-create policy "Kullanici kendi verisini gorur" on pipeline_logs
+drop policy if exists "Workspace access" on pipeline_logs;
+create policy "Workspace access" on pipeline_logs
   for all
-  using (user_id = auth.uid()::text)
-  with check (user_id = auth.uid()::text);
+  using (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  )
+  with check (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  );
 
 alter table seasonal_automation_log enable row level security;
 drop policy if exists "Kullanici kendi verisini gorur" on seasonal_automation_log;
-create policy "Kullanici kendi verisini gorur" on seasonal_automation_log
+drop policy if exists "Workspace access" on seasonal_automation_log;
+create policy "Workspace access" on seasonal_automation_log
   for all
-  using (user_id = auth.uid()::text)
-  with check (user_id = auth.uid()::text);
+  using (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  )
+  with check (
+    auth.uid() is null
+    or auth.uid()::text = user_id
+    or user_id = 'omni_creator'
+  );
+
+-- ==========================================
+-- Realtime Etkinleştirme
+-- ==========================================
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'ideas') then
+    alter publication supabase_realtime add table ideas;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'keywords') then
+    alter publication supabase_realtime add table keywords;
+  end if;
+end $$;
