@@ -24,19 +24,19 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
       const dueList: { idea: IdeaItem; reminder: Reminder }[] = [];
 
       ideas.forEach((idea) => {
-        const allReminders = idea.reminders || (idea.reminder ? [idea.reminder] : []);
-        allReminders.forEach(rem => {
-          if (!rem.isCompleted && !dismissedIds.includes(rem.id)) {
-            const reminderTime = new Date(rem.dateTime).getTime();
-            if (reminderTime <= now) {
-              dueList.push({ idea, reminder: rem });
-            }
+        if (idea.reminder && !idea.reminder.isCompleted && !dismissedIds.includes(idea.reminder.id)) {
+          const reminderTime = new Date(idea.reminder.dateTime).getTime();
+          if (reminderTime <= now) {
+            dueList.push({ idea, reminder: idea.reminder });
           }
-        });
+        }
       });
 
       if (dueList.length > 0 && dueList.length !== activeDueReminders.length) {
+        // Play chime when new due reminder triggers
         playReminderChime();
+
+        // Browser system notification if supported and granted
         if ('Notification' in window && Notification.permission === 'granted') {
           try {
             new Notification(`⏰ Hatırlatıcı: ${dueList[0].idea.title}`, {
@@ -57,33 +57,34 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
     return () => clearInterval(interval);
   }, [ideas, dismissedIds]);
 
-  const handleComplete = (idea: IdeaItem, reminderId: string) => {
-    const updatedReminders = (idea.reminders || (idea.reminder ? [idea.reminder] : [])).map(r => 
-      r.id === reminderId ? { ...r, isCompleted: true } : r
-    );
+  const handleComplete = (idea: IdeaItem) => {
+    if (!idea.reminder) return;
     const updated: IdeaItem = {
       ...idea,
-      reminders: updatedReminders,
-      reminder: undefined,
+      reminder: {
+        ...idea.reminder,
+        isCompleted: true,
+      },
       updatedAt: new Date().toISOString(),
     };
     onUpdateIdea(updated);
-    setDismissedIds((prev) => [...prev, reminderId]);
+    setDismissedIds((prev) => [...prev, idea.reminder!.id]);
   };
 
-  const handleSnooze = (idea: IdeaItem, reminderId: string, hours: number) => {
+  const handleSnooze = (idea: IdeaItem, hours: number) => {
+    if (!idea.reminder) return;
     const newDate = new Date(Date.now() + hours * 3600000).toISOString().slice(0, 16);
-    const updatedReminders = (idea.reminders || (idea.reminder ? [idea.reminder] : [])).map(r => 
-      r.id === reminderId ? { ...r, dateTime: newDate, notified: false } : r
-    );
     const updated: IdeaItem = {
       ...idea,
-      reminders: updatedReminders,
-      reminder: undefined,
+      reminder: {
+        ...idea.reminder,
+        dateTime: newDate,
+        notified: false,
+      },
       updatedAt: new Date().toISOString(),
     };
     onUpdateIdea(updated);
-    setDismissedIds((prev) => [...prev, reminderId]);
+    setDismissedIds((prev) => [...prev, idea.reminder!.id]);
   };
 
   const handleDismiss = (reminderId: string) => {
@@ -143,14 +144,14 @@ export const ReminderBanner: React.FC<ReminderBannerProps> = ({
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleSnooze(idea, reminder.id, 24)}
+                onClick={() => handleSnooze(idea, 24)}
                 className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-medium text-[11px] cursor-pointer"
                 title="24 saat sonraya ertele"
               >
                 +1 Gün Ertele
               </button>
               <button
-                onClick={() => handleComplete(idea, reminder.id)}
+                onClick={() => handleComplete(idea)}
                 className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-semibold text-[11px] flex items-center gap-1 cursor-pointer"
               >
                 <Check className="w-3 h-3" />

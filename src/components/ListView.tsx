@@ -23,8 +23,8 @@ export const ListView: React.FC<ListViewProps> = ({
   const domainConfig: Record<DomainType, { label: string; icon: any; color: string }> = {
     etsy_pod: { label: 'Etsy POD', icon: ShoppingBag, color: 'text-amber-400' },
     youtube_automation: { label: 'YouTube', icon: Video, color: 'text-rose-400' },
-    indonesia: { label: 'Indonesia', icon: Globe, color: 'text-emerald-400' },
-    ai_apps: { label: 'AI App', icon: Cpu, color: 'text-indigo-400' }
+    ai_apps: { label: 'AI App', icon: Cpu, color: 'text-indigo-400' },
+    indonesia: { label: 'Indonesia', icon: Globe, color: 'text-emerald-400' }
   };
 
   const statusLabels: Record<StatusType, string> = {

@@ -185,7 +185,7 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
           if (res.transcript) {
             setRawText(prev => prev ? `${prev}\n${res.transcript}` : res.transcript);
             if (res.suggestedDomain && ['etsy_pod', 'youtube_automation', 'ai_apps', 'indonesia'].includes(res.suggestedDomain)) {
-              setDomain(res.suggestedDomain as DomainType);
+              setDomain(res.suggestedDomain);
             }
             if (res.quickTitle && !customTitle) {
               setCustomTitle(res.quickTitle);
@@ -208,12 +208,12 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   // Smart domain detection based on keywords
   const detectDomainFromText = (text: string) => {
     const lower = text.toLowerCase();
-    if (lower.includes('etsy') || lower.includes('tshirt') || lower.includes('sweatshirt') || lower.includes('niche') || lower.includes('print on demand') || lower.includes('pod') || lower.includes('poster') || lower.includes('kupa')) {
+    if (lower.includes('endonezya') || lower.includes('indonesia') || lower.includes('kitap') || lower.includes('kdp')) {
+      setDomain('indonesia');
+    } else if (lower.includes('etsy') || lower.includes('tshirt') || lower.includes('sweatshirt') || lower.includes('niche') || lower.includes('print on demand') || lower.includes('pod') || lower.includes('poster') || lower.includes('kupa')) {
       setDomain('etsy_pod');
     } else if (lower.includes('youtube') || lower.includes('video') || lower.includes('hook') || lower.includes('script') || lower.includes('kanal') || lower.includes('thumbnail') || lower.includes('elevenlabs') || lower.includes('itiraf') || lower.includes('sorgu')) {
       setDomain('youtube_automation');
-    } else if (lower.includes('indonesia') || lower.includes('endonezya') || lower.includes('shopee') || lower.includes('tokopedia')) {
-      setDomain('indonesia');
     } else if (lower.includes('app') || lower.includes('yapay zeka') || lower.includes('saas') || lower.includes('kod') || lower.includes('api') || lower.includes('yazilim') || lower.includes('mvp')) {
       setDomain('ai_apps');
     }
@@ -323,17 +323,6 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
               }`}
             >
               🎬 YouTube
-            </button>
-            <button
-              type="button"
-              onClick={() => setDomain('indonesia')}
-              className={`py-2 px-3 text-xs font-medium rounded-lg transition-all cursor-pointer truncate ${
-                domain === 'indonesia'
-                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              🌏 Indonesia
             </button>
             <button
               type="button"

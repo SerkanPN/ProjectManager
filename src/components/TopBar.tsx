@@ -1,5 +1,4 @@
-import React from 'react';
-import { Mic, Plus, Sparkles, Download, Layers, Bell, Settings as SettingsIcon, Database } from 'lucide-react';
+import { Mic, Plus, Sparkles, Download, Layers, Bell, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import { DomainType } from '../types';
 
 interface TopBarProps {
@@ -10,6 +9,8 @@ interface TopBarProps {
   totalIdeasCount: number;
   activeDomain: DomainType | 'all';
   pendingRemindersCount?: number;
+  onSignOut?: () => void;
+  userEmail?: string | null;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -19,12 +20,15 @@ export const TopBar: React.FC<TopBarProps> = ({
   onOpenKeywords,
   totalIdeasCount,
   activeDomain,
-  pendingRemindersCount = 0
+  pendingRemindersCount = 0,
+  onSignOut,
+  userEmail
 }) => {
   const domainLabels: Record<string, string> = {
     all: 'Tüm Projeler',
     etsy_pod: 'Etsy Products',
     youtube_automation: 'YouTube',
+    indonesia: 'Indonesia',
     ai_apps: 'AI Apps'
   };
 
@@ -71,17 +75,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span className="hidden sm:inline">Dışarı Aktar</span>
         </button>
 
-        {onOpenKeywords && (
-          <button
-            onClick={onOpenKeywords}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
-            title="Merkezi Keyword Deposu (Etsy SEO Analytics)"
-          >
-            <Database className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Keyword Deposu</span>
-          </button>
-        )}
-
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
@@ -90,6 +83,17 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <SettingsIcon className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">Ayarlar</span>
+          </button>
+        )}
+
+        {onSignOut && (
+          <button
+            onClick={onSignOut}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+            title={`Çıkış Yap (${userEmail || 'Oturum'})`}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden xl:inline text-[11px]">Çıkış</span>
           </button>
         )}
 

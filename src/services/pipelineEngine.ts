@@ -1,245 +1,215 @@
-import { IdeaItem, PipelineStepName, PipelineStepStatus, IdeaCombinationSuggestion, UserKeywordMetric } from '../types';
-import { saveIdeaToFirebase, calculateMaturityScore } from './storage';
-import { 
-  requestAiActionPlan, 
-  requestGroundedResearch, 
-  requestSubIdeas, 
-  requestEtsyListing, 
-  requestVisualConcepts, 
-  requestDesignBrief, 
-  requestYouTubeStudio 
+import { supabase } from '../lib/supabase';
+import { IdeaItem } from '../types';
+import { saveIdeaToSupabase } from './storage';
+import { fetchRelevantKeywordsForIdea } from './keywordRepository';
+import {
+  requestAiActionPlan,
+  requestGroundedResearch,
+  requestSubIdeas,
+  requestEtsyListingDraft,
+  requestVisualConcepts20,
+  requestDesignBrief
 } from './aiService';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from './firebase';
 
-// Helper to fetch matching keywords from Keyword Repository
-export const fetchRelevantKeywordsForIdea = async (userId: string, idea: IdeaItem): Promise<UserKeywordMetric[]> => {
+export interface PipelineLog {
+  id: string;
+  idea_id: string;
+  user_id: string;
+  step: string;
+  status: 'started' | 'success' | 'failed';
+  error: string | null;
+  created_at: string;
+}
+
+export const logPipelineStep = async (
+  ideaId: string,
+  userId: string,
+  step: string,
+  status: 'started' | 'success' | 'failed',
+  error?: string
+) => {
   try {
-    const snap = await getDocs(collection(db, 'users', userId, 'keywords'));
-    if (snap.empty) return [];
-
-    const allKw = snap.docs.map(d => d.data());
-    const textToMatch = `${idea.title} ${idea.rawInput} ${idea.tags.join(' ')}`.toLowerCase();
-
-    const matches = allKw.filter(kw => {
-      const k = (kw.keyword || '').toLowerCase();
-      const tagsMatch = (kw.nicheTags || []).some((t: string) => textToMatch.includes(t.toLowerCase()));
-      return textToMatch.includes(k) || k.split(' ').some((w: string) => w.length > 3 && textToMatch.includes(w)) || tagsMatch;
+    const logId = `log-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const { error: err } = await supabase.from('pipeline_logs').upsert({
+      id: logId,
+      idea_id: ideaId,
+      user_id: userId,
+      step,
+      status,
+      error: error || null,
+      created_at: new Date().toISOString(),
     });
+    if (err) {
+      console.warn('Could not record pipeline log in Supabase:', err);
+    }
+  } catch (e) {
+    console.warn('Pipeline log error:', e);
+  }
+};
 
-    return matches.slice(0, 10).map(m => ({
-      keyword: m.keyword,
-      searchVolume: Number(m.searchVolume) || 0,
-      competitionResults: Number(m.competitionResults) || 0,
-      conversionRate: Number(m.conversionRate) || 0,
-      source: 'user_keyword_data',
-      notes: `Merkezi Keyword Deposundan çekildi (${m.uploadedAt?.slice(0, 10) || ''})`
-    }));
+export const fetchPipelineLogs = async (userId: string, ideaId?: string): Promise<PipelineLog[]> => {
+  try {
+    let query = supabase
+      .from('pipeline_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (ideaId) {
+      query = query.eq('idea_id', ideaId);
+    }
+
+    const { data, error } = await query.limit(50);
+    if (error) throw error;
+    return (data || []) as PipelineLog[];
   } catch (err) {
-    console.warn('Could not query keyword repository:', err);
+    console.error('Failed to fetch pipeline logs:', err);
     return [];
   }
 };
 
-// Helper to calculate combination suggestions between new idea and existing pool
-export const calculateCombinationSuggestions = (idea: IdeaItem, allIdeas: IdeaItem[]): IdeaCombinationSuggestion[] => {
-  const suggestions: IdeaCombinationSuggestion[] = [];
-  const otherIdeas = allIdeas.filter(i => i.id !== idea.id);
+/**
+ * Runs the automated full research & asset generation pipeline for an idea.
+ * Saves progress at each step to Supabase 'ideas' and logs to 'pipeline_logs'.
+ */
+export const runFullPipelineForIdea = async (
+  userId: string,
+  initialIdea: IdeaItem,
+  onProgress?: (stepName: string, progress: number) => void
+): Promise<IdeaItem> => {
+  let currentIdea: IdeaItem = { ...initialIdea };
 
-  for (const other of otherIdeas) {
-    // Check tag or domain overlap
-    const sharedTags = idea.tags.filter(t => other.tags.includes(t));
-    const titleWords1 = idea.title.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
-    const titleWords2 = other.title.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
-    const sharedWords = titleWords1.filter((w: string) => titleWords2.includes(w));
-
-    if (sharedTags.length >= 2 || sharedWords.length >= 1 || (idea.domain === other.domain && sharedTags.length >= 1)) {
-      suggestions.push({
-        ideaId: other.id,
-        title: other.title,
-        domain: other.domain,
-        rationale: `Bu 2 fikir ortak niş etiketlerini (${sharedTags.join(', ') || sharedWords.join(', ')}) paylaşıyor. Tek bir hibrit ürün veya içerik serisinde birleştirilebilir.`,
-        suggestedCombinedTitle: `${idea.title} x ${other.title} Koleksiyonu`
-      });
-    }
-  }
-
-  return suggestions.slice(0, 3);
-};
-
-export interface RunPipelineOptions {
-  userId: string;
-  idea: IdeaItem;
-  allIdeasPool?: IdeaItem[];
-  singleStepOnly?: PipelineStepName;
-  onProgress?: (updatedIdea: IdeaItem) => void;
-  onToast?: (message: string, type?: 'success' | 'info' | 'error') => void;
-}
-
-export const runAutomatedPipeline = async ({
-  userId,
-  idea,
-  allIdeasPool = [],
-  singleStepOnly,
-  onProgress,
-  onToast
-}: RunPipelineOptions): Promise<IdeaItem> => {
-  let currentIdea: IdeaItem = { ...idea };
-  
-  // Initialize step statuses if missing
-  const stepList: { key: PipelineStepName; label: string }[] = idea.domain === 'youtube_automation'
-    ? [
-        { key: 'transform', label: '1. Fikir Dönüştürme & Plan' },
-        { key: 'grounded-research', label: '2. Google Canlı Pazar Araştırması' },
-        { key: 'sub-ideas', label: '3. Niş Kombinasyonları' },
-        { key: 'youtube-studio', label: '4. YouTube Studio Paketi' },
-        { key: 'visual-concepts', label: '5. 20 Thumbnail Promptu' },
-        { key: 'design-brief', label: '6. Görsel Prodüksiyon Briefi' }
-      ]
-    : [
-        { key: 'transform', label: '1. Fikir Dönüştürme & Plan' },
-        { key: 'grounded-research', label: '2. Google Canlı Pazar Araştırması' },
-        { key: 'sub-ideas', label: '3. Niş Kombinasyonları' },
-        { key: 'etsy-listing', label: '4. Etsy SEO & Listing Taslağı' },
-        { key: 'visual-concepts', label: '5. 20 AI Görsel Promptu' },
-        { key: 'design-brief', label: '6. Tasarım Briefi' }
-      ];
-
-  const initialPipelineStatus: Record<string, PipelineStepStatus> = { ...(currentIdea.pipelineStatus || {}) };
-  stepList.forEach(s => {
-    if (!initialPipelineStatus[s.key]) {
-      initialPipelineStatus[s.key] = { step: s.key, label: s.label, status: 'idle' };
-    }
-  });
-
-  currentIdea.pipelineStatus = initialPipelineStatus;
-  currentIdea.pipelineRunning = true;
-
-  // Auto Status Transition #1: Shift inbox -> research on pipeline start
-  if (currentIdea.status === 'inbox') {
-    currentIdea.status = 'research';
-  }
-
-  // Fetch central keywords
-  const repoKeywords = await fetchRelevantKeywordsForIdea(userId, currentIdea);
-  if (repoKeywords.length > 0) {
-    currentIdea.userKeywords = repoKeywords;
-  }
-
-  // Compute combinations
-  if (allIdeasPool.length > 0) {
-    currentIdea.combinationSuggestions = calculateCombinationSuggestions(currentIdea, allIdeasPool);
-  }
-
-  const stepsToExecute = singleStepOnly 
-    ? stepList.filter(s => s.key === singleStepOnly)
-    : stepList;
-
-  onToast?.(`🚀 ${currentIdea.title} için Otomatik Pipeline Başlatıldı`, 'info');
-
-  for (const stepObj of stepsToExecute) {
-    const key = stepObj.key;
-    
-    // Set step status to running
-    currentIdea.pipelineStatus = {
-      ...currentIdea.pipelineStatus,
-      [key]: { step: key, label: stepObj.label, status: 'running' }
-    };
-    
-    // Save state & trigger UI callback
-    await saveIdeaToFirebase(userId, currentIdea);
-    onProgress?.(currentIdea);
-
-    try {
-      if (key === 'transform') {
-        const plan = await requestAiActionPlan(currentIdea.rawInput, currentIdea.domain, currentIdea.title);
-        currentIdea.actionPlan = plan;
-        if (plan.tags) currentIdea.tags = Array.from(new Set([...currentIdea.tags, ...plan.tags]));
-      } 
-      else if (key === 'grounded-research') {
-        const research = await requestGroundedResearch(currentIdea.title, currentIdea.rawInput, currentIdea.domain, currentIdea.userKeywords);
-        currentIdea.groundedResearch = research;
-      }
-      else if (key === 'sub-ideas') {
-        const subs = await requestSubIdeas(currentIdea.title, currentIdea.rawInput, currentIdea.userKeywords, [], currentIdea.domain);
-        currentIdea.subIdeas = subs;
-      }
-      else if (key === 'etsy-listing') {
-        const listing = await requestEtsyListing(
-          currentIdea.title,
-          currentIdea.rawInput,
-          currentIdea.userKeywords,
-          currentIdea.actionPlan?.domainSpecifics?.designConcept,
-          currentIdea.actionPlan?.domainSpecifics?.productType
-        );
-        currentIdea.etsyListing = listing;
-      }
-      else if (key === 'youtube-studio') {
-        const yt = await requestYouTubeStudio(currentIdea.title, currentIdea.rawInput);
-        currentIdea.youtubeStudio = yt;
-      }
-      else if (key === 'visual-concepts') {
-        const visuals = await requestVisualConcepts(
-          currentIdea.title,
-          currentIdea.rawInput,
-          currentIdea.actionPlan?.domainSpecifics?.designConcept,
-          currentIdea.actionPlan?.domainSpecifics?.productType,
-          currentIdea.domain
-        );
-        currentIdea.visualConcepts = Array.isArray(visuals) ? visuals : (visuals.visualConcepts || []);
-      }
-      else if (key === 'design-brief') {
-        const brief = await requestDesignBrief(
-          currentIdea.title,
-          currentIdea.rawInput,
-          currentIdea.actionPlan?.domainSpecifics?.productType,
-          currentIdea.domain
-        );
-        currentIdea.designBrief = brief;
-      }
-
-      // Mark step completed
-      currentIdea.pipelineStatus = {
-        ...currentIdea.pipelineStatus,
-        [key]: { step: key, label: stepObj.label, status: 'completed', completedAt: new Date().toISOString() }
-      };
-
-    } catch (err: any) {
-      console.error(`Pipeline step ${key} failed:`, err);
-      // Step failed, but do NOT stop pipeline
-      currentIdea.pipelineStatus = {
-        ...currentIdea.pipelineStatus,
-        [key]: { step: key, label: stepObj.label, status: 'failed', error: err.message || 'Adım yürütülürken hata oluştu.' }
-      };
-    }
-
-    // Live Maturity Score recalculation
-    const scoreBreakdown = calculateMaturityScore(currentIdea);
-    currentIdea.maturityScore = scoreBreakdown.score;
-
-    // Auto Status Transition #2: If listing/studio + visual concepts done -> shift status to 'in_progress'
-    const hasListingOrStudio = !!(currentIdea.etsyListing || currentIdea.youtubeStudio);
-    const hasVisuals = !!(currentIdea.visualConcepts && currentIdea.visualConcepts.length >= 10);
-    if (hasListingOrStudio && hasVisuals && currentIdea.status !== 'completed') {
-      currentIdea.status = 'in_progress';
-    }
-
-    // Auto Status Transition #3: If score === 100 -> mark completed / publish ready
-    if (scoreBreakdown.score === 100) {
-      if (currentIdea.status !== 'completed') {
-        currentIdea.status = 'completed';
-        onToast?.(`🎉 YAYINA HAZIR! "${currentIdea.title}" %100 olgunluğa ulaştı!`, 'success');
-      }
-    }
-
+  // Helper to persist intermediate state
+  const persist = async () => {
     currentIdea.updatedAt = new Date().toISOString();
-    await saveIdeaToFirebase(userId, currentIdea);
-    onProgress?.(currentIdea);
+    await saveIdeaToSupabase(userId, currentIdea);
+  };
+
+  try {
+    // -------------------------------------------------------------
+    // Step 1: Action Plan
+    // -------------------------------------------------------------
+    onProgress?.('Aksiyon Planı Oluşturuluyor...', 15);
+    await logPipelineStep(currentIdea.id, userId, 'action_plan', 'started');
+    try {
+      const plan = await requestAiActionPlan(
+        currentIdea.rawInput,
+        currentIdea.domain,
+        currentIdea.title
+      );
+      currentIdea.actionPlan = plan;
+      if (plan.tags && plan.tags.length > 0) {
+        currentIdea.tags = Array.from(new Set([...currentIdea.tags, ...plan.tags]));
+      }
+      await persist();
+      await logPipelineStep(currentIdea.id, userId, 'action_plan', 'success');
+    } catch (err: any) {
+      await logPipelineStep(currentIdea.id, userId, 'action_plan', 'failed', err.message);
+    }
+
+    // -------------------------------------------------------------
+    // Step 2: Keywords & Grounded Research
+    // -------------------------------------------------------------
+    onProgress?.('Anahtar Kelime ve Pazar Araştırması...', 35);
+    await logPipelineStep(currentIdea.id, userId, 'keyword_research', 'started');
+    try {
+      const relevantKeywords = await fetchRelevantKeywordsForIdea(
+        userId,
+        `${currentIdea.title} ${currentIdea.rawInput}`
+      );
+      if (relevantKeywords.length > 0) {
+        currentIdea.userKeywords = relevantKeywords;
+      }
+
+      const research = await requestGroundedResearch(
+        currentIdea.title,
+        currentIdea.rawInput,
+        currentIdea.domain,
+        currentIdea.userKeywords
+      );
+      currentIdea.groundedResearch = research;
+      currentIdea.status = 'research';
+      await persist();
+      await logPipelineStep(currentIdea.id, userId, 'keyword_research', 'success');
+    } catch (err: any) {
+      await logPipelineStep(currentIdea.id, userId, 'keyword_research', 'failed', err.message);
+    }
+
+    // -------------------------------------------------------------
+    // Step 3: Sub-Ideas & Niche Kombinasyonları
+    // -------------------------------------------------------------
+    onProgress?.('Alt Fikirler ve Nişler Üretiliyor...', 55);
+    await logPipelineStep(currentIdea.id, userId, 'sub_ideas', 'started');
+    try {
+      const subIdeas = await requestSubIdeas(
+        currentIdea.title,
+        currentIdea.rawInput,
+        currentIdea.userKeywords,
+        [],
+        currentIdea.domain
+      );
+      currentIdea.subIdeas = subIdeas;
+      await persist();
+      await logPipelineStep(currentIdea.id, userId, 'sub_ideas', 'success');
+    } catch (err: any) {
+      await logPipelineStep(currentIdea.id, userId, 'sub_ideas', 'failed', err.message);
+    }
+
+    // -------------------------------------------------------------
+    // Step 4: Listing Draft (or Studio Assets)
+    // -------------------------------------------------------------
+    onProgress?.('Etsy / Ürün Taslağı Hazırlanıyor...', 75);
+    await logPipelineStep(currentIdea.id, userId, 'listing_draft', 'started');
+    try {
+      const listing = await requestEtsyListingDraft(
+        currentIdea.title,
+        currentIdea.rawInput,
+        currentIdea.userKeywords,
+        currentIdea.actionPlan?.domainSpecifics?.designConcept,
+        currentIdea.actionPlan?.domainSpecifics?.productType
+      );
+      currentIdea.etsyListing = listing;
+      await persist();
+      await logPipelineStep(currentIdea.id, userId, 'listing_draft', 'success');
+    } catch (err: any) {
+      await logPipelineStep(currentIdea.id, userId, 'listing_draft', 'failed', err.message);
+    }
+
+    // -------------------------------------------------------------
+    // Step 5: Visual Concepts & Design Brief
+    // -------------------------------------------------------------
+    onProgress?.('20 Görsel Konsept ve Tasarım Briefi...', 90);
+    await logPipelineStep(currentIdea.id, userId, 'visual_and_brief', 'started');
+    try {
+      const [visuals, brief] = await Promise.all([
+        requestVisualConcepts20(
+          currentIdea.title,
+          currentIdea.rawInput,
+          currentIdea.actionPlan?.domainSpecifics?.designConcept,
+          currentIdea.actionPlan?.domainSpecifics?.productType,
+          currentIdea.domain
+        ),
+        requestDesignBrief(
+          currentIdea.title,
+          currentIdea.rawInput,
+          currentIdea.actionPlan?.domainSpecifics?.productType,
+          currentIdea.domain
+        )
+      ]);
+      currentIdea.visualConcepts = visuals;
+      currentIdea.designBrief = brief;
+      currentIdea.status = 'in_progress';
+      await persist();
+      await logPipelineStep(currentIdea.id, userId, 'visual_and_brief', 'success');
+    } catch (err: any) {
+      await logPipelineStep(currentIdea.id, userId, 'visual_and_brief', 'failed', err.message);
+    }
+
+    onProgress?.('Pipeline Başarıyla Tamamlandı!', 100);
+    return currentIdea;
+  } catch (fatalError: any) {
+    console.error('Fatal pipeline error:', fatalError);
+    await logPipelineStep(currentIdea.id, userId, 'pipeline_fatal', 'failed', fatalError.message);
+    return currentIdea;
   }
-
-  currentIdea.pipelineRunning = false;
-  await saveIdeaToFirebase(userId, currentIdea);
-  onProgress?.(currentIdea);
-
-  return currentIdea;
 };

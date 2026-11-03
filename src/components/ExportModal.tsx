@@ -146,7 +146,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <option value="all">Tüm Projeler ({ideas.length})</option>
                 <option value="etsy_pod">Yalnızca Etsy Products ({ideas.filter(i => i.domain === 'etsy_pod').length})</option>
                 <option value="youtube_automation">Yalnızca YouTube ({ideas.filter(i => i.domain === 'youtube_automation').length})</option>
-                <option value="indonesia">Yalnızca Indonesia ({ideas.filter(i => i.domain === 'indonesia').length})</option>
                 <option value="ai_apps">Yalnızca AI Apps ({ideas.filter(i => i.domain === 'ai_apps').length})</option>
               </select>
             </div>

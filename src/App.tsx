@@ -4,23 +4,26 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { DomainType, StatusType, IdeaItem, ViewMode, PriorityType } from './types';
 import { 
   subscribeToIdeas, 
-  saveIdeaToFirebase, 
-  seedRealProjectsToFirebase,
-  deleteIdeaFromFirebase, 
+  saveIdeaToSupabase, 
+  deleteIdeaFromSupabase, 
   getStoredIdeas, 
-  clearLocalStorage,
-  REAL_USER_PROJECTS 
+  resetToRealProjects 
 } from './services/storage';
-import { subscribeToKeywords } from './services/keywordRepository';
-import { runAutomatedPipeline } from './services/pipelineEngine';
-import { checkAndRunSeasonalAutomation } from './services/seasonalAutomation';
-import { KeywordRepositoryItem } from './types';
-import { auth, signInWithGoogle } from './services/firebase';
+import { 
+  supabase, 
+  DEFAULT_USER,
+  signInWithGoogle, 
+  signInWithEmailPassword, 
+  signUpWithEmail, 
+  signOut 
+} from './lib/supabase';
 import { requestAiActionPlan } from './services/aiService';
+import { runFullPipelineForIdea } from './services/pipelineEngine';
+import { checkAndTriggerSeasonalAlerts } from './services/seasonalAutomation';
 import { createLocalBackupSnapshot, getSettings, saveSettings } from './services/backupService';
 import { uploadBackupToDrive } from './services/driveService';
 import { TopBar } from './components/TopBar';
@@ -33,26 +36,19 @@ import { IdeaDetailModal } from './components/IdeaDetailModal';
 import { ExportModal } from './components/ExportModal';
 import { SettingsModal } from './components/SettingsModal';
 import { KeywordRepositoryModal } from './components/KeywordRepositoryModal';
+import { subscribeToKeywords, KeywordRecord } from './services/keywordRepository';
 import { InsightsPanel } from './components/InsightsPanel';
 import { TimelineView } from './components/TimelineView';
 import { ReminderBanner } from './components/ReminderBanner';
-import { LogIn, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, CheckCircle2, Zap } from 'lucide-react';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(DEFAULT_USER as unknown as User);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
   const [ideas, setIdeas] = useState<IdeaItem[]>([]);
-  const [keywords, setKeywords] = useState<KeywordRepositoryItem[]>([]);
   
-  // Toast Notification State
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const [pipelineProgress, setPipelineProgress] = useState<{ step: string; percent: number } | null>(null);
 
-  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4500);
-  };
-  
   // Persisted view states
   const [activeDomain, setActiveDomain] = useState<DomainType | 'all'>(
     (localStorage.getItem('activeDomain') as any) || 'all'
@@ -73,6 +69,7 @@ export default function App() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isKeywordsOpen, setIsKeywordsOpen] = useState(false);
+  const [keywords, setKeywords] = useState<KeywordRecord[]>([]);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
 
   // Sync state to localStorage for persistence across reloads
@@ -82,52 +79,73 @@ export default function App() {
     localStorage.setItem('viewMode', viewMode);
   }, [activeDomain, activeStatusFilter, viewMode]);
 
-  // Auth & Subscriptions
+  // Supabase Auth & Session Detection
   useEffect(() => {
-    let hasSeeded = false;
-    let unsubKw: (() => void) | null = null;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+      }
+      if (session?.provider_token) {
+        setAccessToken(session.provider_token);
+      }
+    }).catch(err => {
+      console.warn('Supabase getSession notice:', err);
+    });
 
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setAuthLoading(false);
-      
-      if (u) {
-        // 1. Subscribe to Ideas
-        const unsubIdeas = subscribeToIdeas(u.uid, (newIdeas) => {
-          if (newIdeas.length === 0 && !hasSeeded) {
-            hasSeeded = true;
-            setIdeas(REAL_USER_PROJECTS);
-            seedRealProjectsToFirebase(u.uid);
-          } else if (newIdeas.length === 0) {
-            setIdeas(REAL_USER_PROJECTS);
-          } else {
-            setIdeas(newIdeas);
-          }
-        });
-
-        // 2. Subscribe to Keyword Repository
-        unsubKw = subscribeToKeywords(u.uid, (kws) => {
-          setKeywords(kws);
-        });
-
-        return () => {
-          unsubIdeas();
-          if (unsubKw) unsubKw();
-        };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
       } else {
-        setIdeas([]);
-        setKeywords([]);
+        setUser(DEFAULT_USER as unknown as User);
+      }
+      if (session?.provider_token) {
+        setAccessToken(session.provider_token);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Background Seasonal Automation Check (Runs once per session)
+  // Ideas subscription & Local Storage Migration
   useEffect(() => {
-    if (user && ideas.length > 0) {
-      checkAndRunSeasonalAutomation(user.uid, ideas, showToast);
+    if (!user) {
+      setIdeas([]);
+      return;
     }
-  }, [user?.uid, ideas.length]);
+
+    // Subscribe to Supabase realtime changes
+    const unsubscribe = subscribeToIdeas(user.id, (newIdeas) => {
+      setIdeas(newIdeas);
+    });
+
+    const unsubscribeKw = subscribeToKeywords(user.id, (kws) => {
+      setKeywords(kws);
+    });
+
+    // Sync cached ideas to Supabase in background without clearing local storage
+    const localIdeas = getStoredIdeas();
+    if (localIdeas.length > 0) {
+      (async () => {
+        for (const idea of localIdeas) {
+          try {
+            await saveIdeaToSupabase(user.id, idea);
+          } catch (e) {
+            console.error('Sync error for idea:', idea.id, e);
+          }
+        }
+      })();
+    }
+
+    // Seasonal alert trigger
+    checkAndTriggerSeasonalAlerts(user.id);
+
+    return () => {
+      unsubscribe();
+      if (unsubscribeKw) unsubscribeKw();
+    };
+  }, [user]);
 
   // Periodic Drive Backup Logic
   useEffect(() => {
@@ -226,7 +244,6 @@ export default function App() {
       etsy_pod: ideas.filter((i) => i.domain === 'etsy_pod').length,
       youtube_automation: ideas.filter((i) => i.domain === 'youtube_automation').length,
       ai_apps: ideas.filter((i) => i.domain === 'ai_apps').length,
-      indonesia: ideas.filter((i) => i.domain === 'indonesia').length,
       inbox: ideas.filter((i) => i.status === 'inbox').length,
       research: ideas.filter((i) => i.status === 'research').length,
       in_progress: ideas.filter((i) => i.status === 'in_progress').length,
@@ -236,24 +253,25 @@ export default function App() {
   }, [ideas]);
 
   const pendingRemindersCount = useMemo(() => {
-    return ideas.filter((i) => (i.reminder && !i.reminder.isCompleted) || (i.reminders && i.reminders.some((r) => !r.isCompleted))).length;
+    return ideas.reduce((acc, item) => {
+      const list = item.reminders || (item.reminder ? [item.reminder] : []);
+      const pending = list.filter((r) => !r.isCompleted).length;
+      return acc + pending;
+    }, 0);
   }, [ideas]);
 
-  const handleLogin = async () => {
-    try {
-      const res = await signInWithGoogle();
-      if (res.accessToken) setAccessToken(res.accessToken);
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
+  const handleSignOut = async () => {
+    await signOut();
+    setUser(DEFAULT_USER as unknown as User);
+    setAccessToken(null);
   };
 
   const handleSaveNewIdea = async (data: {
     title: string;
     rawInput: string;
     domain: DomainType;
-    priority?: PriorityType;
-    generateActionPlanImmediately?: boolean;
+    priority: PriorityType;
+    generateActionPlanImmediately: boolean;
     parentId?: string;
   }) => {
     if (!user) return;
@@ -264,33 +282,31 @@ export default function App() {
       rawInput: data.rawInput,
       domain: data.domain,
       status: 'inbox',
-      priority: data.priority || 'medium',
+      priority: data.priority,
       tags: [data.domain.replace('_', ' ')],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       parentId: data.parentId
     };
 
-    // Save initial record to Firestore
-    await saveIdeaToFirebase(user.uid, newIdea);
+    if (data.generateActionPlanImmediately) {
+      setIsGeneratingPlan(true);
+      try {
+        const plan = await requestAiActionPlan(data.rawInput, data.domain, data.title);
+        newIdea.actionPlan = plan;
+        if (plan.tags && plan.tags.length > 0) {
+          newIdea.tags = Array.from(new Set([...newIdea.tags, ...plan.tags]));
+        }
+      } catch (err) {
+        console.error('Plan generation failed:', err);
+      } finally {
+        setIsGeneratingPlan(false);
+      }
+    }
 
-    // Auto-trigger full automated pipeline (transform -> grounded-research -> sub-ideas -> etsy-listing/youtube-studio -> visual-concepts -> design-brief)
-    runAutomatedPipeline({
-      userId: user.uid,
-      idea: newIdea,
-      allIdeasPool: ideas,
-      onToast: showToast
-    });
-  };
-
-  const handleRunPipelineForIdea = async (targetIdea: IdeaItem) => {
-    if (!user) return;
-    runAutomatedPipeline({
-      userId: user.uid,
-      idea: targetIdea,
-      allIdeasPool: ideas,
-      onToast: showToast
-    });
+    // Optimistically update React state immediately for instant UI feedback
+    setIdeas((prev) => [newIdea, ...prev.filter(i => i.id !== newIdea.id)]);
+    await saveIdeaToSupabase(user.id, newIdea);
   };
 
   const handleAdvanceStatus = async (id: string, newStatus: StatusType) => {
@@ -298,11 +314,16 @@ export default function App() {
     const idea = ideas.find(i => i.id === id);
     if (!idea) return;
     
-    await saveIdeaToFirebase(user.uid, {
+    const updated: IdeaItem = {
       ...idea,
       status: newStatus,
       updatedAt: new Date().toISOString()
-    });
+    };
+    setIdeas((prev) => prev.map((i) => i.id === id ? updated : i));
+    if (selectedIdea && selectedIdea.id === id) {
+      setSelectedIdea(updated);
+    }
+    await saveIdeaToSupabase(user.id, updated);
   };
 
   const handleToggleFavorite = async (id: string) => {
@@ -310,23 +331,30 @@ export default function App() {
     const idea = ideas.find(i => i.id === id);
     if (!idea) return;
 
-    await saveIdeaToFirebase(user.uid, {
+    const updated: IdeaItem = {
       ...idea,
       isFavorite: !idea.isFavorite,
       updatedAt: new Date().toISOString()
-    });
+    };
+    setIdeas((prev) => prev.map((i) => i.id === id ? updated : i));
+    if (selectedIdea && selectedIdea.id === id) {
+      setSelectedIdea(updated);
+    }
+    await saveIdeaToSupabase(user.id, updated);
   };
 
   const handleDeleteIdea = async (id: string) => {
     if (!user) return;
-    await deleteIdeaFromFirebase(user.uid, id);
+    setIdeas((prev) => prev.filter(i => i.id !== id));
     if (selectedIdea && selectedIdea.id === id) setSelectedIdea(null);
+    await deleteIdeaFromSupabase(user.id, id);
   };
 
   const handleUpdateIdea = async (updated: IdeaItem) => {
     if (!user) return;
-    await saveIdeaToFirebase(user.uid, updated);
+    setIdeas((prev) => prev.map((i) => i.id === updated.id ? updated : i));
     if (selectedIdea && selectedIdea.id === updated.id) setSelectedIdea(updated);
+    await saveIdeaToSupabase(user.id, updated);
   };
 
   const handleGeneratePlanForIdea = async (idea: IdeaItem) => {
@@ -348,73 +376,23 @@ export default function App() {
     }
   };
 
-  const handleResetToRealProjects = async () => {
+  const handleRunFullPipeline = async (idea: IdeaItem) => {
     if (!user) return;
-    setIdeas(REAL_USER_PROJECTS);
-    await seedRealProjectsToFirebase(user.uid);
+    try {
+      const updated = await runFullPipelineForIdea(user.id, idea, (step, percent) => {
+        setPipelineProgress({ step, percent });
+      });
+      setIdeas((prev) => prev.map((i) => i.id === updated.id ? updated : i));
+      setSelectedIdea(updated);
+      setTimeout(() => setPipelineProgress(null), 2500);
+    } catch (err) {
+      console.error('Pipeline run error:', err);
+      setPipelineProgress(null);
+    }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-500 animate-spin flex items-center justify-center">
-          <span className="text-slate-950 font-black text-xl">Ω</span>
-        </div>
-        <p className="text-slate-400 font-medium animate-pulse">OmniFocus Yükleniyor...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center space-y-8">
-        <div className="space-y-3 max-w-md">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-500 flex items-center justify-center text-slate-950 font-black text-4xl shadow-2xl mx-auto mb-6">
-            Ω
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">OmniFocus <span className="text-slate-500 font-normal">Idea OS</span></h1>
-          <p className="text-slate-400 leading-relaxed">
-            Fikirlerinizi organize edin, AI ile aksiyon planları oluşturun ve pazar araştırması yapın. Başlamak için Google ile oturum açın.
-          </p>
-        </div>
-        
-        <button 
-          onClick={handleLogin}
-          className="flex items-center gap-3 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-2xl transition-all active:scale-95 shadow-xl"
-        >
-          <LogIn className="w-5 h-5" />
-          <span>Google ile Giriş Yap</span>
-        </button>
-
-        <div className="text-slate-600 text-xs font-medium uppercase tracking-widest">
-          Sadece sizin erişebileceğiniz güvenli veri merkezi
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
-      {/* Toast Notification Banner */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-3 animate-in slide-in-from-top duration-200 ${
-          toast.type === 'success'
-            ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
-            : toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
-              : 'bg-slate-900/95 border-amber-500/40 text-slate-100'
-        }`}>
-          {toast.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          ) : toast.type === 'error' ? (
-            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
-          ) : (
-            <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
-          )}
-          <span className="text-xs font-semibold">{toast.message}</span>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <TopBar
         onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
@@ -423,7 +401,28 @@ export default function App() {
         totalIdeasCount={ideas.length}
         activeDomain={activeDomain}
         pendingRemindersCount={pendingRemindersCount}
+        onSignOut={handleSignOut}
+        userEmail={user?.email}
       />
+
+      {/* Pipeline Floating Status Bar */}
+      {pipelineProgress && (
+        <div className="bg-gradient-to-r from-emerald-600 via-indigo-600 to-amber-600 px-4 py-2 text-xs text-white flex items-center justify-between sticky top-[57px] z-30 shadow-lg animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 animate-bounce text-amber-300" />
+            <span className="font-semibold">{pipelineProgress.step}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-32 bg-black/30 rounded-full h-2 overflow-hidden">
+              <div 
+                className="bg-white h-full transition-all duration-300" 
+                style={{ width: `${pipelineProgress.percent}%` }}
+              />
+            </div>
+            <span className="font-mono font-bold text-[11px]">%{pipelineProgress.percent}</span>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
@@ -439,7 +438,10 @@ export default function App() {
           viewMode={viewMode}
           onSelectViewMode={setViewMode}
           counts={counts}
-          onResetToRealProjects={handleResetToRealProjects}
+          onResetToRealProjects={async () => {
+            const restored = await resetToRealProjects(user?.id || 'omni_creator');
+            setIdeas(restored);
+          }}
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-7xl mx-auto w-full">
@@ -472,7 +474,7 @@ export default function App() {
               onAdvanceStatus={handleAdvanceStatus}
               onToggleFavorite={handleToggleFavorite}
               onDeleteIdea={handleDeleteIdea}
-              onGeneratePlan={handleRunPipelineForIdea}
+              onGeneratePlan={handleGeneratePlanForIdea}
             />
           ) : viewMode === 'kanban' ? (
             <KanbanBoard
@@ -481,8 +483,8 @@ export default function App() {
               onAdvanceStatus={handleAdvanceStatus}
               onToggleFavorite={handleToggleFavorite}
               onDeleteIdea={handleDeleteIdea}
-              onGeneratePlan={handleRunPipelineForIdea}
-              onQuickAddInStatus={(s) => setIsQuickCaptureOpen(true)}
+              onGeneratePlan={handleGeneratePlanForIdea}
+              onQuickAddInStatus={(_s) => setIsQuickCaptureOpen(true)}
             />
           ) : (
             <ListView
@@ -491,7 +493,7 @@ export default function App() {
               onAdvanceStatus={handleAdvanceStatus}
               onToggleFavorite={handleToggleFavorite}
               onDeleteIdea={handleDeleteIdea}
-              onGeneratePlan={handleRunPipelineForIdea}
+              onGeneratePlan={handleGeneratePlanForIdea}
             />
           )}
         </main>
@@ -511,20 +513,19 @@ export default function App() {
         onClose={() => setSelectedIdea(null)}
         onUpdateIdea={handleUpdateIdea}
         onDeleteIdea={handleDeleteIdea}
-        onRegeneratePlan={handleRunPipelineForIdea}
+        onRegeneratePlan={handleGeneratePlanForIdea}
         isGeneratingPlan={isGeneratingPlan}
-        onSpawnNewIdea={handleSaveNewIdea}
+        onSpawnNewIdea={(data) => handleSaveNewIdea({ ...data, priority: 'medium', generateActionPlanImmediately: true })}
         ideasPool={ideas}
+        onRunPipeline={handleRunFullPipeline}
       />
 
-      {user && (
-        <KeywordRepositoryModal
-          isOpen={isKeywordsOpen}
-          onClose={() => setIsKeywordsOpen(false)}
-          keywords={keywords}
-          userId={user.uid}
-        />
-      )}
+      <KeywordRepositoryModal
+        isOpen={isKeywordsOpen}
+        onClose={() => setIsKeywordsOpen(false)}
+        keywords={keywords}
+        userId={user?.id || 'omni_creator'}
+      />
 
       <ExportModal
         isOpen={isExportOpen}
@@ -532,7 +533,7 @@ export default function App() {
         ideas={filteredIdeas}
         onImportIdeas={async (imported) => {
           if (!user) return;
-          for (const idea of imported) await saveIdeaToFirebase(user.uid, idea);
+          for (const idea of imported) await saveIdeaToSupabase(user.id, idea);
         }}
       />
 
@@ -542,7 +543,7 @@ export default function App() {
         ideas={ideas}
         onRestoreIdeas={async (restored) => {
           if (!user) return;
-          for (const idea of restored) await saveIdeaToFirebase(user.uid, idea);
+          for (const idea of restored) await saveIdeaToSupabase(user.id, idea);
         }}
         user={user}
         accessToken={accessToken}

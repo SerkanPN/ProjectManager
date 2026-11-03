@@ -23,8 +23,8 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
   const domainConfig: Record<DomainType, { label: string; icon: any; color: string }> = {
     etsy_pod: { label: 'Etsy POD', icon: ShoppingBag, color: 'text-amber-400' },
     youtube_automation: { label: 'YouTube', icon: Video, color: 'text-rose-400' },
-    indonesia: { label: 'Indonesia', icon: Globe, color: 'text-emerald-400' },
-    ai_apps: { label: 'AI App', icon: Cpu, color: 'text-indigo-400' }
+    ai_apps: { label: 'AI App', icon: Cpu, color: 'text-indigo-400' },
+    indonesia: { label: 'Indonesia', icon: Globe, color: 'text-emerald-400' }
   };
 
   const nextStatusMap: Record<StatusType, { next: StatusType; label: string } | null> = {
@@ -71,28 +71,22 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
                 </span>
               </>
             )}
-            {(() => {
-              const allReminders = idea.reminders || (idea.reminder ? [idea.reminder] : []);
-              const nextRem = allReminders.find(r => !r.isCompleted);
-              if (!nextRem) return null;
-              
-              const isOverdue = new Date(nextRem.dateTime).getTime() < Date.now();
-              
-              return (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span 
-                    className={`inline-flex items-center gap-1 font-mono text-[10px] ${
-                      isOverdue ? 'text-rose-400 font-semibold' : 'text-amber-400'
-                    }`}
-                    title={`Hatırlatıcı: ${new Date(nextRem.dateTime).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}`}
-                  >
-                    <Bell className="w-2.5 h-2.5 shrink-0" />
-                    <span>{new Date(nextRem.dateTime).toLocaleDateString('tr-TR', { month: 'numeric', day: 'numeric' })}</span>
-                  </span>
-                </>
-              );
-            })()}
+            {idea.reminder && !idea.reminder.isCompleted && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span 
+                  className={`inline-flex items-center gap-1 font-mono text-[10px] ${
+                    new Date(idea.reminder.dateTime).getTime() < Date.now()
+                      ? 'text-rose-400 font-semibold'
+                      : 'text-amber-400'
+                  }`}
+                  title={`Hatırlatıcı: ${new Date(idea.reminder.dateTime).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}`}
+                >
+                  <Bell className="w-2.5 h-2.5 shrink-0" />
+                  <span>{new Date(idea.reminder.dateTime).toLocaleDateString('tr-TR', { month: 'numeric', day: 'numeric' })}</span>
+                </span>
+              </>
+            )}
             <>
               <span aria-hidden="true">·</span>
               <span className={`text-[10px] font-bold font-mono ${maturity.isReadyToPublish ? 'text-emerald-400' : 'text-slate-400'}`} title="Olgunluk Skoru">
@@ -146,22 +140,12 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
         )}
       </div>
 
-      {/* Combination Suggestion Badge */}
-      {idea.combinationSuggestions && idea.combinationSuggestions.length > 0 && (
-        <div className="mb-2.5 p-2 bg-indigo-950/60 border border-indigo-500/30 rounded-lg text-[11px] text-indigo-300 flex items-center justify-between gap-1.5">
-          <div className="flex items-center gap-1.5 truncate">
-            <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
-            <span className="truncate">Kombinasyon: <strong>{idea.combinationSuggestions[0].title}</strong></span>
-          </div>
-        </div>
-      )}
-
       {/* Card Bottom: Checklist status & Next pipeline stage trigger */}
       <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs gap-2">
         {totalTasks > 0 ? (
           <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px] tabular-nums">
             <CheckSquare className="w-3 h-3 text-emerald-500" />
-            <span>{doneTasks}/{totalTasks} adım</span>
+            <span>{doneTasks}/{totalTasks} adim</span>
           </div>
         ) : (
           <button
@@ -171,8 +155,8 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
             }}
             className="flex items-center gap-1 text-[11px] text-amber-400/90 hover:text-amber-300 transition-colors font-medium cursor-pointer"
           >
-            <Sparkles className={`w-3 h-3 ${idea.pipelineRunning ? 'animate-spin' : ''}`} />
-            <span>{idea.pipelineRunning ? 'Pipeline Çalışıyor...' : 'AI Otomatik Pipeline'}</span>
+            <Sparkles className="w-3 h-3" />
+            <span>AI Plani Uret</span>
           </button>
         )}
 
@@ -183,7 +167,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
               onAdvanceStatus(idea.id, nextStatus.next);
             }}
             className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2 py-1 rounded transition-colors cursor-pointer"
-            title={`${nextStatus.label} aşamasına taşı`}
+            title={`${nextStatus.label} asamasina tasi`}
           >
             <span>{nextStatus.label}</span>
             <ArrowRight className="w-3 h-3" />

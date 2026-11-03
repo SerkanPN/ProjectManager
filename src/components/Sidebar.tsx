@@ -15,7 +15,6 @@ interface SidebarProps {
     etsy_pod: number;
     youtube_automation: number;
     ai_apps: number;
-    indonesia: number;
     inbox: number;
     research: number;
     in_progress: number;
@@ -61,14 +60,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Video,
       count: counts.youtube_automation,
       accent: 'text-rose-400'
-    },
-    {
-      id: 'indonesia' as const,
-      label: '🌏 Indonesia',
-      subtitle: 'Endonezya tarihi & KDP yayıncılık',
-      icon: Globe,
-      count: counts.indonesia,
-      accent: 'text-emerald-400'
     },
     {
       id: 'ai_apps' as const,

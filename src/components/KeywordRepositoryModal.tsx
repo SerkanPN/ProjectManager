@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import { X, Upload, Plus, Database, Sparkles, Search, Trash2, ArrowUpRight, FileSpreadsheet, RefreshCw } from 'lucide-react';
-import { KeywordRepositoryItem } from '../types';
+import { X, Upload, Plus, Database, Sparkles, Search, Trash2, FileSpreadsheet, RefreshCw } from 'lucide-react';
 import { 
-  saveKeywordToRepository, 
-  deleteKeywordFromRepository, 
-  parseCsvKeywords, 
-  seedKeywordsToRepository,
-  calculateKeywordWeight
+  KeywordRecord, 
+  saveKeywordsToSupabase, 
+  deleteKeyword 
 } from '../services/keywordRepository';
 
 interface KeywordRepositoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  keywords: KeywordRepositoryItem[];
+  keywords: KeywordRecord[];
   userId: string;
 }
 
@@ -34,8 +31,7 @@ export const KeywordRepositoryModal: React.FC<KeywordRepositoryModalProps> = ({
   if (!isOpen) return null;
 
   const filteredKeywords = keywords.filter(k => 
-    k.keyword.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (k.nicheTags && k.nicheTags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())))
+    k.keyword.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,14 +39,24 @@ export const KeywordRepositoryModal: React.FC<KeywordRepositoryModalProps> = ({
     if (!file) return;
 
     const text = await file.text();
-    const parsed = parseCsvKeywords(text);
-    if (parsed.length === 0) {
-      alert('CSV formatı anlaşılamadı. Format: Keyword, Search Volume, Competition Results, Conversion Rate');
-      return;
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    if (lines.length <= 1) return;
+
+    const rows: { keyword: string; search_volume: number; search_result: number; conversion_rate: number }[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',').map(p => p.trim().replace(/^"/, '').replace(/"$/, ''));
+      if (parts.length >= 2 && parts[0]) {
+        rows.push({
+          keyword: parts[0],
+          search_volume: parseInt(parts[1], 10) || 0,
+          search_result: parseInt(parts[2], 10) || 0,
+          conversion_rate: parseFloat(parts[3]) || 0,
+        });
+      }
     }
 
-    for (const item of parsed) {
-      await saveKeywordToRepository(userId, item);
+    if (rows.length > 0) {
+      await saveKeywordsToSupabase(userId, rows);
     }
   };
 
@@ -58,13 +64,13 @@ export const KeywordRepositoryModal: React.FC<KeywordRepositoryModalProps> = ({
     e.preventDefault();
     if (!newKeyword.trim()) return;
 
-    await saveKeywordToRepository(userId, {
+    await saveKeywordsToSupabase(userId, [{
       keyword: newKeyword.trim(),
-      searchVolume: Number(newVolume) || 0,
-      competitionResults: Number(newResults) || 0,
-      conversionRate: Number(newConvRate) || 0,
-      nicheTags: newTags.split(',').map(t => t.trim()).filter(Boolean)
-    });
+      search_volume: Number(newVolume) || 0,
+      search_result: Number(newResults) || 0,
+      conversion_rate: Number(newConvRate) || 0,
+      uploaded_at: new Date().toISOString()
+    }]);
 
     setNewKeyword('');
     setNewVolume('');
@@ -74,9 +80,17 @@ export const KeywordRepositoryModal: React.FC<KeywordRepositoryModalProps> = ({
     setIsAddingManual(false);
   };
 
+  const DEFAULT_INITIAL_KEYWORDS = [
+    { keyword: 'affirmation poster calendar 2026', search_volume: 18500, search_result: 420, conversion_rate: 5.8 },
+    { keyword: 'personalized spotify song poster', search_volume: 42000, search_result: 1850, conversion_rate: 6.2 },
+    { keyword: 'custom album cover print', search_volume: 31000, search_result: 1200, conversion_rate: 5.4 },
+    { keyword: 'custom movie ticket poster', search_volume: 15400, search_result: 380, conversion_rate: 7.1 },
+    { keyword: 'custom star map night sky', search_volume: 28900, search_result: 1400, conversion_rate: 5.9 }
+  ];
+
   const handleSeedDefault = async () => {
     setIsSeeding(true);
-    await seedKeywordsToRepository(userId);
+    await saveKeywordsToSupabase(userId, DEFAULT_INITIAL_KEYWORDS);
     setIsSeeding(false);
   };
 
@@ -241,43 +255,32 @@ export const KeywordRepositoryModal: React.FC<KeywordRepositoryModalProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-slate-300">
                   {filteredKeywords.map((item) => {
-                    const score = item.weightScore || calculateKeywordWeight(item);
+                    const weightScore = Math.min(100, Math.round((item.weight || 1.0) * 80));
                     return (
                       <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-2.5 px-4 font-medium text-white flex items-center gap-2">
                           <span>{item.keyword}</span>
-                          {item.nicheTags && item.nicheTags.length > 0 && (
-                            <span className="text-[9px] px-1.5 py-0.5 bg-slate-800 rounded text-slate-400">
-                              {item.nicheTags[0]}
-                            </span>
-                          )}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-slate-200">
-                          {item.searchVolume?.toLocaleString() || 0}
+                          {item.search_volume?.toLocaleString() || 0}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-slate-400">
-                          {item.competitionResults?.toLocaleString() || 0}
+                          {item.search_result?.toLocaleString() || 0}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-amber-400 font-semibold">
-                          %{item.conversionRate || 0}
+                          %{item.conversion_rate || 0}
                         </td>
                         <td className="py-2.5 px-3 font-mono">
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                            score >= 70
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : score >= 40
-                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                : 'bg-slate-800 text-slate-400'
-                          }`}>
-                            {score} / 100
+                          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            {weightScore} / 100
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-[11px] text-slate-500 font-mono">
-                          {item.uploadedAt?.slice(0, 10) || 'Yeni'}
+                          {item.uploaded_at?.slice(0, 10) || 'Yeni'}
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           <button
-                            onClick={() => deleteKeywordFromRepository(userId, item.id)}
+                            onClick={() => deleteKeyword(userId, item.id)}
                             className="p-1 text-slate-500 hover:text-rose-400 transition-colors rounded cursor-pointer"
                             title="Kelimeyi Sil"
                           >

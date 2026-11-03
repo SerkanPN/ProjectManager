@@ -27,9 +27,10 @@ interface IdeaDetailModalProps {
   isGeneratingPlan: boolean;
   onSpawnNewIdea?: (newIdea: { title: string; rawInput: string; domain: DomainType; parentId?: string }) => void;
   ideasPool: IdeaItem[];
+  onRunPipeline?: (idea: IdeaItem) => Promise<void>;
 }
 
-type TabType = 'plan' | 'research' | 'listing' | 'visuals' | 'design_brief' | 'sub_ideas' | 'youtube_studio';
+type TabType = 'plan' | 'research' | 'listing' | 'visuals' | 'design_brief' | 'sub_ideas';
 
 export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
   idea,
@@ -40,9 +41,12 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
   onRegeneratePlan,
   isGeneratingPlan,
   onSpawnNewIdea,
-  ideasPool
+  ideasPool,
+  onRunPipeline
 }) => {
   if (!isOpen || !idea) return null;
+
+  const [isRunningPipeline, setIsRunningPipeline] = useState(false);
 
   const [activeTab, setActiveTab] = useState<TabType>('plan');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -485,17 +489,17 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
       color: 'text-rose-400',
       badge: 'border-rose-500/30 bg-rose-500/10 text-rose-300'
     },
-    indonesia: { 
-      label: 'Endonezya Projesi & Yayıncılık', 
-      icon: Globe, 
-      color: 'text-emerald-400',
-      badge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-    },
     ai_apps: { 
       label: 'AI Uygulama Geliştirme', 
       icon: Cpu, 
       color: 'text-indigo-400',
       badge: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300'
+    },
+    indonesia: {
+      label: 'Indonesia E-Ticaret',
+      icon: Globe,
+      color: 'text-emerald-400',
+      badge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
     }
   };
 
@@ -529,7 +533,9 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
               onChange={(e) => handleStatusChange(e.target.value as StatusType)}
               className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1 rounded-md border border-slate-700 focus:outline-none focus:border-amber-400 cursor-pointer"
             >
-              <option value="in_progress">Üretimde / Kodlamada</option>
+              <option value="inbox">Gelen Kutusu (Fikir)</option>
+              <option value="research">Araştırma & Doğrulama</option>
+              <option value="in_progress">Üretimde / Geliştirme</option>
               <option value="completed">Tamamlandı / Canlıda</option>
             </select>
 
@@ -554,9 +560,28 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onRunPipeline && (
+              <button
+                onClick={async () => {
+                  setIsRunningPipeline(true);
+                  try {
+                    await onRunPipeline(idea);
+                  } finally {
+                    setIsRunningPipeline(false);
+                  }
+                }}
+                disabled={isRunningPipeline || isGeneratingPlan}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+                title="Tüm adımları (Plan + Araştırma + Alt Fikirler + Etsy/Studio + 20 Görsel + Brief) otomatik çalıştır"
+              >
+                <Sparkles className={`w-3.5 h-3.5 ${isRunningPipeline ? 'animate-spin text-amber-400' : 'text-emerald-400'}`} />
+                <span>{isRunningPipeline ? 'Pipeline Çalışıyor...' : '⚡ Tam Pipeline'}</span>
+              </button>
+            )}
+
             <button
               onClick={() => onRegeneratePlan(idea)}
-              disabled={isGeneratingPlan}
+              disabled={isGeneratingPlan || isRunningPipeline}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               title="Yapay zeka ile aksiyon planını yenile"
             >
@@ -670,72 +695,6 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
           )}
         </div>
 
-        {/* Automated Pipeline Progress Steps */}
-        <div className="px-6 py-2.5 bg-slate-950/80 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 overflow-x-auto py-1">
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Pipeline:</span>
-            </span>
-
-            {[
-              { key: 'transform', label: '1. Plan' },
-              { key: 'grounded-research', label: '2. Araştırma' },
-              { key: 'sub-ideas', label: '3. Niş' },
-              { key: idea.domain === 'youtube_automation' ? 'youtube-studio' : 'etsy-listing', label: idea.domain === 'youtube_automation' ? '4. YouTube' : '4. Listing' },
-              { key: 'visual-concepts', label: '5. 20 Görsel' },
-              { key: 'design-brief', label: '6. Brief' },
-            ].map((stepObj) => {
-              const status = idea.pipelineStatus?.[stepObj.key]?.status || 'idle';
-              return (
-                <div
-                  key={stepObj.key}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono flex items-center gap-1 shrink-0 ${
-                    status === 'completed'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
-                      : status === 'running'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse font-bold'
-                        : status === 'failed'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold'
-                          : 'bg-slate-800 text-slate-500'
-                  }`}
-                >
-                  {status === 'completed' && <Check className="w-3 h-3 text-emerald-400" />}
-                  {status === 'running' && <RefreshCw className="w-3 h-3 text-amber-400 animate-spin" />}
-                  {status === 'failed' && <AlertTriangle className="w-3 h-3 text-rose-400" />}
-                  {status === 'idle' && <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />}
-                  <span>{stepObj.label}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={() => onRegeneratePlan(idea)}
-            disabled={idea.pipelineRunning}
-            className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] rounded-lg transition-all cursor-pointer flex items-center gap-1 shrink-0 disabled:opacity-50"
-          >
-            <Sparkles className={`w-3 h-3 ${idea.pipelineRunning ? 'animate-spin' : ''}`} />
-            <span>{idea.pipelineRunning ? 'Çalışıyor...' : 'Tüm Pipeline Otomatik Çalıştır'}</span>
-          </button>
-        </div>
-
-        {/* Combination Suggestion Notice Banner */}
-        {idea.combinationSuggestions && idea.combinationSuggestions.length > 0 && (
-          <div className="mx-6 mt-3 p-3 bg-indigo-950/60 border border-indigo-500/40 rounded-xl text-xs text-indigo-200 flex items-center justify-between gap-3 animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
-              <div>
-                <span className="font-bold text-white">💡 Fikir Kombinasyon Önerisi: </span>
-                <span>{idea.combinationSuggestions[0].rationale}</span>
-              </div>
-            </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 shrink-0 font-bold">
-              Ortak Niş Tespiti
-            </span>
-          </div>
-        )}
-
         {/* Navigation Tabs */}
         <div className="px-6 border-b border-slate-800 flex items-center gap-1 overflow-x-auto bg-slate-950/40">
           <button
@@ -759,37 +718,22 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
             }`}
           >
             <BarChart2 className="w-3.5 h-3.5" />
-            <span>Veri & Araştırma</span>
-            {idea.groundedResearch && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
+            <span>Veri & Araştırma (Data Öncelik)</span>
+            {idea.dataComparison && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
           </button>
 
-          {idea.domain === 'youtube_automation' ? (
-            <button
-              onClick={() => setActiveTab('youtube_studio')}
-              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'youtube_studio'
-                  ? 'border-rose-400 text-rose-300'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Video className="w-3.5 h-3.5 text-rose-400" />
-              <span>YouTube Studio Paketi</span>
-              {idea.youtubeStudio && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
-            </button>
-          ) : (
-            <button
-              onClick={() => setActiveTab('listing')}
-              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'listing'
-                  ? 'border-amber-400 text-amber-300'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Etsy Listing Hazırlığı</span>
-              {idea.etsyListing && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('listing')}
+            className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === 'listing'
+                ? 'border-amber-400 text-amber-300'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Etsy Listing Hazırlığı</span>
+            {idea.etsyListing && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
+          </button>
 
           <button
             onClick={() => setActiveTab('visuals')}
@@ -1839,88 +1783,6 @@ export const IdeaDetailModal: React.FC<IdeaDetailModalProps> = ({
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{loadingBrief ? 'Brief Hazırlanıyor...' : 'Tasarım Briefi Üret'}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB: YOUTUBE STUDIO PAKETİ */}
-          {activeTab === 'youtube_studio' && (
-            <div className="space-y-6 animate-in fade-in duration-100">
-              {idea.youtubeStudio ? (
-                <div className="space-y-6">
-                  {/* First 30s Hook */}
-                  <div className="p-4 bg-rose-950/20 border border-rose-500/30 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-rose-400 uppercase tracking-wider">🔥 Vurucu İlk 30 Saniye Kancası (Hook)</span>
-                      <button
-                        onClick={() => handleCopy(idea.youtubeStudio!.first30sHook, 'yt-hook')}
-                        className="flex items-center gap-1 text-slate-400 hover:text-white cursor-pointer"
-                      >
-                        {copiedKey === 'yt-hook' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedKey === 'yt-hook' ? 'Kopyalandı!' : 'Kopyala'}</span>
-                      </button>
-                    </div>
-                    <p className="text-sm text-slate-100 leading-relaxed font-medium">
-                      "{idea.youtubeStudio.first30sHook}"
-                    </p>
-                  </div>
-
-                  {/* SEO Titles & Description */}
-                  <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
-                    <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">SEO Başlık Varyasyonları & Açıklama</h4>
-                    <div className="space-y-1.5">
-                      {idea.youtubeStudio.seoTitlesAndTags.titles.map((t, idx) => (
-                        <div key={idx} className="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-white flex items-center justify-between">
-                          <span>{t}</span>
-                          <button onClick={() => handleCopy(t, `yt-title-${idx}`)} className="text-slate-500 hover:text-amber-400 cursor-pointer">
-                            {copiedKey === `yt-title-${idx}` ? 'Kopyalandı' : 'Kopyala'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800 whitespace-pre-line leading-relaxed">
-                      {idea.youtubeStudio.seoTitlesAndTags.descriptionDraft}
-                    </p>
-                  </div>
-
-                  {/* Script Outline */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Video İskeleti & Senaryo Adımları</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {idea.youtubeStudio.scriptOutline.map((sec, idx) => (
-                        <div key={idx} className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-amber-400">{sec.section}</span>
-                            <span className="font-mono text-[10px] text-slate-500">{sec.duration}</span>
-                          </div>
-                          <ul className="space-y-1 text-xs text-slate-300">
-                            {sec.bulletPoints.map((bp, bidx) => (
-                              <li key={bidx} className="flex items-start gap-1.5">
-                                <span className="text-amber-400 font-bold">•</span>
-                                <span>{bp}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-8 text-center bg-slate-950/50 border border-dashed border-slate-800 rounded-2xl space-y-3">
-                  <Video className="w-8 h-8 text-rose-400 mx-auto" />
-                  <h3 className="text-sm font-semibold text-white">YouTube Studio paketi henüz çalıştırılmadı</h3>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Otomatik pipeline çalıştığında Hook, Script Outline, SEO Başlıkları ve 20 Thumbnail promptu otomatik üretilir.
-                  </p>
-                  <button
-                    onClick={() => onRegeneratePlan(idea)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>YouTube Studio Pipeline Çalıştır</span>
                   </button>
                 </div>
               )}

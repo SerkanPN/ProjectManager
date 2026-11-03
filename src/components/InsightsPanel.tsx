@@ -25,8 +25,8 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
     const counts: Record<DomainType, number> = {
       etsy_pod: 0,
       youtube_automation: 0,
-      indonesia: 0,
       ai_apps: 0,
+      indonesia: 0,
     };
     ideas.forEach((i) => {
       if (counts[i.domain] !== undefined) {
@@ -37,8 +37,8 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
     return [
       { name: 'Etsy Products', domain: 'etsy_pod', count: counts.etsy_pod, fill: '#F59E0B' },
       { name: 'YouTube', domain: 'youtube_automation', count: counts.youtube_automation, fill: '#EF4444' },
-      { name: 'Indonesia', domain: 'indonesia', count: counts.indonesia, fill: '#10B981' },
       { name: 'AI Apps', domain: 'ai_apps', count: counts.ai_apps, fill: '#6366F1' },
+      { name: 'Indonesia', domain: 'indonesia', count: counts.indonesia, fill: '#10B981' },
     ];
   }, [ideas]);
 
@@ -69,7 +69,6 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
     const domains: { key: DomainType; name: string }[] = [
       { key: 'etsy_pod', name: 'Etsy Products' },
       { key: 'youtube_automation', name: 'YouTube' },
-      { key: 'indonesia', name: 'Indonesia' },
       { key: 'ai_apps', name: 'AI Apps' },
     ];
 
@@ -416,7 +415,6 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
         const domainBreakdown = [
           { key: 'etsy_pod', name: 'Etsy Products', color: 'text-amber-400', barBg: 'bg-amber-400' },
           { key: 'youtube_automation', name: 'YouTube Automation', color: 'text-rose-400', barBg: 'bg-rose-400' },
-          { key: 'indonesia', name: 'Indonesia', color: 'text-emerald-400', barBg: 'bg-emerald-400' },
           { key: 'ai_apps', name: 'AI Apps', color: 'text-indigo-400', barBg: 'bg-indigo-400' },
         ].map(d => {
           const comp = ideas.filter(i => i.domain === d.key && i.status === 'completed').length;

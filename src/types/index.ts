@@ -179,7 +179,6 @@ export interface EtsyListingDraft {
   generatedAt: string;
 }
 
-// 4. 20 Listing Visual Concepts
 export type VisualConceptType = 'hero' | 'product_design' | 'lifestyle_mockup' | 'infographic';
 
 export interface VisualConceptItem {
@@ -268,48 +267,6 @@ export interface IdeaItem {
   youtubeStudio?: YouTubeStudioOutput;
   aiAppStudio?: AIAppStudioOutput;
   indonesiaStudio?: IndonesiaStudioOutput;
-
-  // Pipeline & Keyword Repository extensions
-  pipelineStatus?: Record<string, PipelineStepStatus>;
-  pipelineRunning?: boolean;
-  combinationSuggestions?: IdeaCombinationSuggestion[];
-}
-
-export interface KeywordRepositoryItem {
-  id: string;
-  keyword: string;
-  searchVolume: number;
-  competitionResults: number;
-  conversionRate: number; // e.g. 4.5 (%)
-  uploadedAt: string; // ISO date string
-  weightScore?: number;
-  nicheTags?: string[];
-  notes?: string;
-}
-
-export type PipelineStepName = 
-  | 'transform'
-  | 'grounded-research'
-  | 'sub-ideas'
-  | 'etsy-listing'
-  | 'youtube-studio'
-  | 'visual-concepts'
-  | 'design-brief';
-
-export interface PipelineStepStatus {
-  step: PipelineStepName;
-  label: string;
-  status: 'idle' | 'running' | 'completed' | 'failed';
-  error?: string;
-  completedAt?: string;
-}
-
-export interface IdeaCombinationSuggestion {
-  ideaId: string;
-  title: string;
-  domain: DomainType;
-  rationale: string;
-  suggestedCombinedTitle?: string;
 }
 
 export interface Settings {

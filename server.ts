@@ -10,6 +10,25 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+async function generateWithModelCascade(ai: GoogleGenAI, prompt: string | any, config?: any) {
+  const modelsToTry = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+  let lastError: any = null;
+
+  for (const model of modelsToTry) {
+    try {
+      return await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config,
+      });
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`Model ${model} request failed, trying next candidate:`, err?.message || err);
+    }
+  }
+  throw lastError;
+}
+
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
@@ -35,8 +54,8 @@ async function startServer() {
       keys = req.body.apiKeys.filter(Boolean);
     }
 
-    if ((!keys || keys.length === 0) && process.env.GEMINI_API_KEY) {
-      keys = [process.env.GEMINI_API_KEY];
+    if ((!keys || keys.length === 0) && (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY)) {
+      keys = [process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || ''];
     }
 
     if (!keys || keys.length === 0) {
@@ -60,24 +79,7 @@ async function startServer() {
     return { ai, keyIndex: currentIndex };
   }
 
-  const PRIMARY_MODEL = 'gemini-3-flash-preview';
-
-  async function generateWithModel(ai: GoogleGenAI, prompt: string | any, config?: any) {
-    try {
-      return await ai.models.generateContent({
-        model: PRIMARY_MODEL,
-        contents: prompt,
-        config,
-      });
-    } catch (err: any) {
-      console.warn(`Primary model ${PRIMARY_MODEL} failed, trying fallback gemini-2.5-flash:`, err?.message || err);
-      return await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config,
-      });
-    }
-  }
+  const generateWithModel = generateWithModelCascade;
 
   // 1. Transform raw idea into actionable structured plan
   app.post('/api/ai/transform', async (req, res) => {
@@ -386,36 +388,29 @@ Raporun en sonuna şu JSON formatını ekle:
       }
 
       const prompt = `Gorev: YouTube Otomasyon videosu "${title}" (Not: ${rawInput}) icin eksiksiz YouTube Studio paketi hazirla.
-Dil: Turkce.
-
-Lutfen su JSON formatinda ver:
+JSON Semasi:
 {
-  "first30sHook": "Ilk 30 saniyede izleyiciyi tutacak vurucu kanca metni.",
+  "first30sHook": "...",
   "seoTitlesAndTags": {
-    "titles": ["CTR Odakli Baslik 1", "Baslik 2", "Baslik 3"],
-    "tags": ["etiket1", "etiket2", "etiket3"],
-    "descriptionDraft": "SEO uyumlu video aciklamasi."
+    "titles": ["Baslik 1", "Baslik 2", "Baslik 3"],
+    "tags": ["tag1", "tag2", "tag3"],
+    "descriptionDraft": "..."
   },
   "scriptOutline": [
-    { "section": "Giris & Hook", "duration": "0:00 - 1:00", "bulletPoints": ["Konuya giris", "Merak unsuru"] },
-    { "section": "Gelisme", "duration": "1:00 - 6:00", "bulletPoints": ["Detayli anlati", "Gorsel destekli kanitlar"] },
-    { "section": "Cagri (CTA)", "duration": "6:00 - 7:30", "bulletPoints": ["Abone ol", "Diger videoya yonlendir"] }
+    { "section": "Giris & Hook", "duration": "0:00 - 0:45", "bulletPoints": ["...", "..."] },
+    { "section": "Ana Hikaye", "duration": "0:45 - 4:00", "bulletPoints": ["...", "..."] }
   ],
   "storyboard": [
-    { "scene": 1, "visual": "Midjourney Prompt: ...", "audio": "Anlatici: ...", "onScreenText": "..." },
-    { "scene": 2, "visual": "Stock Footage Spec: ...", "audio": "Anlatici: ...", "onScreenText": "..." }
+    { "scene": 1, "visual": "...", "audio": "...", "onScreenText": "..." },
+    { "scene": 2, "visual": "...", "audio": "...", "onScreenText": "..." }
   ]
 }`;
 
       const response = await generateWithModel(ai, prompt, { responseMimeType: 'application/json' });
       const parsed = JSON.parse(response.text || '{}');
-      
-      // Also generate 20 thumbnail concepts using the visual concepts logic but adapted
-      const visuals = await generateVisualConcepts(ai, title, rawInput, 'Thumbnail', 'YouTube Video', 'youtube_automation');
-
       return res.json({
         ...parsed,
-        thumbnailConcepts20: visuals.visualConcepts || visuals,
+        thumbnailConcepts20: generateLocalFallbackVisualConcepts(title, rawInput, 'youtube_automation'),
         generatedAt: new Date().toISOString()
       });
     } catch (err) {
@@ -434,31 +429,28 @@ Lutfen su JSON formatinda ver:
       }
 
       const prompt = `Gorev: Yapay Zeka Uygulamasi "${title}" (Not: ${rawInput}) icin PRD, Wireframe Flow, Tech Stack ve GTM stratejisi uret.
-Dil: Turkce.
-
 JSON Semasi:
 {
   "prd": {
-    "overview": "Uygulamanin vizyonu ve cozdugu temel sorun.",
-    "keyFeatures": ["Ozellik 1", "Ozellik 2", "Ozellik 3"],
-    "userStories": ["Bir kullanici olarak ... istiyorum, cunku ...", "..."],
-    "nonFunctionalReqs": ["Güvenlik", "Performans", "Ölçeklenebilirlik"]
+    "overview": "...",
+    "keyFeatures": ["...", "..."],
+    "userStories": ["...", "..."],
+    "nonFunctionalReqs": ["...", "..."]
   },
   "wireframeFlow": [
-    { "screen": "Dashboard", "components": ["Butonlar", "Grafikler"], "userActions": "Kullanici veriyi yukler ve analiz baslar." },
-    { "screen": "Ayarlar", "components": ["API Key Input"], "userActions": "Kullanici model secer." }
+    { "screen": "Dashboard", "components": ["...", "..."], "userActions": "..." }
   ],
   "techStackArchitecture": {
-    "frontend": "Modern UI Stack (örn: React + Vite + Tailwind)",
-    "backend": "Scaleable Backend (örn: Node.js + Express)",
-    "aiModels": "Kullanilacak LLM (örn: Gemini 2.5 Flash)",
-    "db": "Veri saklama (örn: Firestore)",
-    "deployment": "Lansman yeri (örn: Vercel)"
+    "frontend": "React + Vite + Tailwind",
+    "backend": "Express Node.js",
+    "aiModels": "Gemini 3 Flash Preview",
+    "db": "LocalStorage / Firestore",
+    "deployment": "AI Studio Preview / Vercel"
   },
   "gtmStrategy": {
-    "launchChannels": ["ProductHunt", "Twitter", "Reddit"],
-    "pricingModel": "Gelir modeli (örn: SaaS Subscription)",
-    "initialTargetUsers": "Ilk etapta hedeflenen 100 kisi."
+    "launchChannels": ["ProductHunt", "Twitter/X", "Reddit"],
+    "pricingModel": "Freemium ($9/mo)",
+    "initialTargetUsers": "..."
   }
 }`;
 
@@ -664,11 +656,7 @@ JSON Semasi:
   "analyzedAt": "${new Date().toISOString()}"
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   return JSON.parse(response.text || '{}');
 }
@@ -717,11 +705,7 @@ JSON Semasi:
   ]
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   const parsed = JSON.parse(response.text || '{}');
   return parsed.subIdeas || generateLocalFallbackSubIdeas(title, rawInput, domain);
@@ -803,11 +787,7 @@ JSON OUTPUT SCHEMA:
   "generatedAt": "${new Date().toISOString()}"
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   return JSON.parse(response.text || '{}');
 }
@@ -871,11 +851,7 @@ JSON OUTPUT SCHEMA:
   ]
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   const parsed = JSON.parse(response.text || '{}');
   return parsed.visualConcepts || generateLocalFallbackVisualConcepts(title, rawInput, domain);
@@ -946,11 +922,7 @@ JSON Semasi:
   "generatedAt": "${new Date().toISOString()}"
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   return JSON.parse(response.text || '{}');
 }
@@ -987,11 +959,7 @@ async function generateSeasonalIdeas(ai: GoogleGenAI | null, eventName: string, 
 
   const prompt = `Gorev: ABD Sezonluk Takvim etkinligi "${eventName}" (${eventDate}) icin 2 ay oncesinden uretim takvimi ve fikir uret.`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' },
-  });
+  const response = await generateWithModelCascade(ai, prompt, { responseMimeType: 'application/json' });
 
   return JSON.parse(response.text || '{}');
 }

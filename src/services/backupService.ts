@@ -16,7 +16,7 @@ export function getSettings(): Settings {
         autoBackupIntervalMinutes: parsed.autoBackupIntervalMinutes || 1,
         lastBackupTimestamp: parsed.lastBackupTimestamp,
         lastDriveBackupTimestamp: parsed.lastDriveBackupTimestamp,
-        isDriveBackupEnabled: parsed.isDriveBackupEnabled ?? true,
+        isDriveBackupEnabled: !!parsed.isDriveBackupEnabled,
       };
     }
   } catch (e) {
@@ -28,7 +28,7 @@ export function getSettings(): Settings {
     selectedModel: 'gemini-3-flash-preview',
     autoBackupEnabled: true,
     autoBackupIntervalMinutes: 1,
-    isDriveBackupEnabled: true,
+    isDriveBackupEnabled: false,
   };
 }
 
