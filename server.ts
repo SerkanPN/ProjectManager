@@ -444,7 +444,7 @@ JSON Semasi:
     "frontend": "React + Vite + Tailwind",
     "backend": "Express Node.js",
     "aiModels": "Gemini 3 Flash Preview",
-    "db": "LocalStorage / Firestore",
+    "db": "Supabase Database",
     "deployment": "AI Studio Preview / Vercel"
   },
   "gtmStrategy": {
@@ -615,7 +615,7 @@ function generateLocalFallbackPlan(rawInput: string, domain: string, currentTitl
         frontend: 'React + Tailwind CSS + Lucide Icons',
         backend: 'Express API proxy',
         aiEngine: 'Google Gemini 3 Flash Preview',
-        database: 'LocalStorage / Firestore'
+        database: 'Supabase Database'
       },
       mvpFeatures: [
         '1. Hızlı girdi ve doğrulama formu',
@@ -1045,7 +1045,7 @@ function generateLocalFallbackAIAppStudio(title?: string, rawInput?: string) {
       frontend: 'React + Vite + Tailwind CSS',
       backend: 'Express Node.js',
       aiModels: 'Gemini 3 Flash Preview',
-      db: 'LocalStorage / Firestore',
+      db: 'Supabase Database',
       deployment: 'AI Studio Preview'
     },
     gtmStrategy: {
